@@ -1,0 +1,12 @@
+{
+  "name": "go-git-client-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for Go Git Client",
+  "main": "index.js",
+  "scripts": {
+    "dev": "echo \"No frontend build step required for simple Wails app\"",
+    "build": "echo \"No frontend build step required for simple Wails app\""
+  },
+  "author": "",
+  "license": "ISC"
+}

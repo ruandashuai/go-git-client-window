@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test Wails Bindings</title>
+</head>
+<body>
+    <h1>Wails 绑定测试</h1>
+    <pre id="output"></pre>
+
+    <script src="wailsjs/runtime/index.js"></script>
+    <script>
+        const output = document.getElementById('output');
+
+        function log(message) {
+            output.textContent += message + '\n';
+            console.log(message);
+        }
+
+        log('开始测试 Wails 绑定...\n');
+        log('window 对象的属性:');
+        for (let key in window) {
+            if (key.includes('go') || key.includes('wails')) {
+                log(`  - ${key}: ${typeof window[key]}`);
+            }
+        }
+
+        log('\n检查 window.go:');
+        if (typeof window.go !== 'undefined') {
+            log('  window.go 存在');
+            log('  window.go 的属性:');
+            for (let key in window.go) {
+                log(`    - ${key}: ${typeof window.go[key]}`);
+            }
+
+            if (window.go.main) {
+                log('  window.go.main 存在');
+                log('  window.go.main 的属性:');
+                for (let key in window.go.main) {
+                    log(`    - ${key}: ${typeof window.go.main[key]}`);
+                }
+            } else {
+                log('  window.go.main 不存在');
+            }
+        } else {
+            log('  window.go 不存在');
+        }
+
+        log('\n等待 2 秒后再次检查...');
+        setTimeout(() => {
+            log('\n2 秒后检查:');
+            if (typeof window.go !== 'undefined') {
+                log('  window.go 存在');
+                if (window.go.main) {
+                    log('  window.go.main 存在');
+                    if (window.go.main.App) {
+                        log('  window.go.main.App 存在');
+                        log('  window.go.main.App 的方法:');
+                        for (let key in window.go.main.App) {
+                            log(`    - ${key}: ${typeof window.go.main.App[key]}`);
+                        }
+                    } else {
+                        log('  window.go.main.App 不存在');
+                    }
+                } else {
+                    log('  window.go.main 不存在');
+                }
+            } else {
+                log('  window.go 仍然不存在');
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "Go Git Client",
+  "assetdir": "frontend/dist",
+  "wailsjsdir": "frontend/src",
+  "frontend:build": "npm run build",
+  "frontend:install": "npm install",
+  "frontend:dev": "npm run dev",
+  "info": {
+    "companyName": "Git Client",
+    "productName": "Go Git Client",
+    "productVersion": "1.0.0",
+    "copyright": "Copyright (C) 2026",
+    "comments": "A Git client built with Wails"
+  }
+}
