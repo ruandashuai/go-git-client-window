@@ -1,0 +1,32 @@
+# Build output directories
+/build/
+/bin/
+/dist/
+
+# Go build artifacts
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Go module cache
+/go/pkg/mod/
+
+# IDE and editor files
+/.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Logs and temporary files
+*.log
+tmp/
+temp/
+
+# Wails specific - only ignore generated dist, not source bindings
+/frontend/dist/
+
+# OS generated files
+Thumbs.db
+ehthumbs.db

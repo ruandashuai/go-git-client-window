@@ -61,6 +61,14 @@
             overflow: hidden;
         }
         .sidebar {
+            width: 300px;
+            background-color: #313335;
+            border-right: 1px solid #4e5254;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .file-panel {
             width: 350px;
             background-color: #313335;
             border-right: 1px solid #4e5254;
@@ -78,12 +86,27 @@
             justify-content: space-between;
             align-items: center;
         }
-        .branch-tree {
+        .branch-tree, .file-list {
             flex: 1;
             overflow-y: auto;
             padding: 8px;
         }
-        .tree-item {
+        .branch-group, .file-group {
+            margin-bottom: 8px;
+        }
+        .group-header {
+            padding: 8px 12px;
+            background-color: #3c3f41;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #a9b7c6;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .tree-item, .file-item {
             padding: 6px 12px;
             cursor: pointer;
             border-radius: 4px;
@@ -92,19 +115,26 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            padding-left: 20px;
         }
-        .tree-item:hover {
+        .tree-item:hover, .file-item:hover {
             background-color: #4e5254;
         }
-        .tree-item.active {
+        .tree-item.active, .file-item.active {
             background-color: #4a6d8c;
             color: #ffffff;
         }
-        .tree-item .icon {
+        .tree-item .icon, .file-item .icon {
             font-size: 14px;
         }
-        .tree-item .branch-name {
+        .tree-item .branch-name, .file-item .file-name {
             flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .file-item .status-icon {
+            font-size: 12px;
         }
         .tree-item .branch-tag {
             background-color: #6a8759;
@@ -113,14 +143,7 @@
             border-radius: 3px;
             font-size: 11px;
         }
-        .tree-item .remote-tag {
-            background-color: #cc7832;
-            color: #ffffff;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 11px;
-        }
-        .commit-history {
+        .commit-history, .diff-view {
             flex: 1;
             background-color: #2b2b2b;
             overflow-y: auto;
@@ -134,46 +157,46 @@
             margin-bottom: 12px;
             cursor: pointer;
             transition: border-color 0.2s;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
         }
         .commit-item:hover {
             border-color: #4a6d8c;
-        }
-        .commit-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
+            background-color: #36393a;
         }
         .commit-hash {
             color: #9876aa;
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
-        }
-        .commit-author {
-            color: #cc7832;
-            font-size: 12px;
-        }
-        .commit-date {
-            color: #808080;
-            font-size: 12px;
+            font-weight: bold;
+            margin-right: 12px;
         }
         .commit-message {
             color: #a9b7c6;
-            font-size: 14px;
-            margin-bottom: 8px;
-            font-weight: 500;
         }
-        .commit-branches {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
+        .diff-content {
+            background-color: #1e1e1e;
+            border-radius: 6px;
+            padding: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
-        .commit-branch {
-            background-color: #4a6d8c;
-            color: #ffffff;
-            padding: 2px 8px;
-            border-radius: 3px;
-            font-size: 11px;
+        .diff-content .diff-header {
+            color: #808080;
+            margin-bottom: 12px;
+        }
+        .diff-content .diff-add {
+            color: #6a8759;
+            background-color: rgba(106, 135, 89, 0.1);
+        }
+        .diff-content .diff-remove {
+            color: #cc7832;
+            background-color: rgba(204, 120, 50, 0.1);
+        }
+        .diff-content .diff-hunk {
+            color: #9876aa;
+            font-weight: bold;
         }
         .status-bar {
             background-color: #3c3f41;
@@ -235,6 +258,61 @@
         .refresh-btn:hover {
             background-color: #4e5254;
         }
+        .context-menu {
+            position: fixed;
+            background-color: #3c3f41;
+            border: 1px solid #4e5254;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            z-index: 1000;
+            min-width: 150px;
+            display: none;
+        }
+        .context-menu-item {
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #a9b7c6;
+        }
+        .context-menu-item:hover {
+            background-color: #4a6d8c;
+            color: #ffffff;
+        }
+        .context-menu-item.disabled {
+            color: #808080;
+            cursor: not-allowed;
+        }
+        .context-menu-item.disabled:hover {
+            background-color: transparent;
+        }
+        .tab-header {
+            background-color: #3c3f41;
+            padding: 8px 16px;
+            border-bottom: 1px solid #4e5254;
+            display: flex;
+            gap: 8px;
+        }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: #a9b7c6;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background-color 0.2s;
+        }
+        .tab-btn:hover {
+            background-color: #4e5254;
+        }
+        .tab-btn.active {
+            background-color: #4a6d8c;
+            color: #ffffff;
+        }
+        .status-modified { color: #cc7832; }
+        .status-added { color: #6a8759; }
+        .status-deleted { color: #c0392b; }
+        .status-renamed { color: #9876aa; }
     </style>
 </head>
 <body>
@@ -246,9 +324,10 @@
         </div>
 
         <div class="main-content">
+            <!-- 左侧：分支树 -->
             <div class="sidebar">
                 <div class="sidebar-header">
-                    <span>🌳 分支树</span>
+                    <span>🌳 分支</span>
                     <div class="action-buttons">
                         <button onclick="createBranch()">新建分支</button>
                         <button class="refresh-btn" onclick="refreshBranches()">↻</button>
@@ -259,16 +338,29 @@
                 </div>
             </div>
 
-            <div class="commit-history">
-                <div class="sidebar-header" style="background: transparent; border-bottom: 1px solid #4e5254; margin-bottom: 16px;">
-                    <span>📝 提交历史</span>
-                    <div class="action-buttons">
-                        <button onclick="showStatus()">查看状态</button>
-                        <button class="refresh-btn" onclick="refreshCommits()">↻</button>
-                    </div>
+            <!-- 中间：文件变更列表 -->
+            <div class="file-panel">
+                <div class="sidebar-header">
+                    <span>📄 文件变更</span>
+                    <button class="refresh-btn" onclick="refreshFiles()">↻</button>
+                </div>
+                <div class="file-list" id="fileList">
+                    <div class="loading">请先加载仓库...</div>
+                </div>
+            </div>
+
+            <!-- 右侧：提交历史或 Diff 视图 -->
+            <div class="diff-view">
+                <div class="tab-header">
+                    <button class="tab-btn active" id="tabCommits" onclick="switchTab('commits')">📝 提交历史</button>
+                    <button class="tab-btn" id="tabDiff" onclick="switchTab('diff')">🔍 Diff</button>
+                    <span id="selectedInfo" style="color: #808080; font-size: 12px; margin-left: auto;"></span>
                 </div>
                 <div id="commitHistory">
-                    <div class="loading">请先加载仓库...</div>
+                    <div class="loading">请先选择一个分支查看提交历史...</div>
+                </div>
+                <div id="diffView" style="display: none;">
+                    <div class="loading">请先选择一个文件查看 diff...</div>
                 </div>
             </div>
         </div>
@@ -276,17 +368,26 @@
         <div class="status-bar">
             <div>
                 <span class="status-indicator disconnected" id="statusIndicator"></span>
-                <span id="currentBranch">未加载仓库</span>
+                <span id="statusText">未加载仓库</span>
             </div>
             <div id="repoInfo"></div>
         </div>
+    </div>
+
+    <!-- 右键菜单 -->
+    <div class="context-menu" id="contextMenu">
+        <div class="context-menu-item" id="menuCheckout">🔄 Checkout</div>
     </div>
 
     <script src="wailsjs/runtime/index.js"></script>
     <script>
         let currentRepoPath = '';
         let currentBranch = '';
+        let selectedBranch = '';
+        let selectedFile = null;
+        let currentTab = 'commits';
         let wailsReady = false;
+        let contextMenuTarget = null;
 
         // 等待 Wails 初始化
         function waitForWails(callback, maxAttempts = 10, interval = 500) {
@@ -326,7 +427,7 @@
             }
             await Promise.all([
                 loadBranches(),
-                loadCommits(),
+                loadFiles(),
                 loadCurrentBranch()
             ]);
             updateStatusBar();
@@ -343,34 +444,69 @@
                     throw new Error('Wails 绑定未就绪');
                 }
                 
-                const result = await window.go.main.App.GitBranch(currentRepoPath);
-                const branches = result.split('\n').filter(b => b.trim());
+                // 获取本地分支
+                const localResult = await window.go.main.App.GitLocalBranches(currentRepoPath);
+                const localBranches = localResult.split('\n').filter(b => b.trim());
                 
-                if (branches.length === 0) {
-                    container.innerHTML = '<div class="error-message">未找到分支</div>';
-                    return;
-                }
-
+                // 获取远程分支
+                const remoteResult = await window.go.main.App.GitRemoteBranches(currentRepoPath);
+                const remoteBranches = remoteResult.split('\n').filter(b => b.trim());
+                
                 let html = '';
-                branches.forEach(branch => {
-                    const isCurrent = branch.startsWith('*');
-                    const branchName = branch.replace(/^\*?\s*/, '').trim();
-                    const isRemote = branchName.startsWith('remotes/');
-                    const cleanName = isRemote ? branchName.replace('remotes/', '') : branchName;
-                    
-                    const icon = isRemote ? '📡' : '🌿';
-                    const tagClass = isCurrent ? 'branch-tag' : 'remote-tag';
-                    const itemClass = isCurrent ? 'tree-item active' : 'tree-item';
-                    const tagText = isCurrent ? '当前' : (isRemote ? '远程' : '');
 
-                    html += `
-                        <div class="${itemClass}" onclick="switchBranch('${branchName}')">
-                            <span class="icon">${icon}</span>
-                            <span class="branch-name">${cleanName}</span>
-                            ${tagText ? `<span class="${tagClass}">${tagText}</span>` : ''}
-                        </div>
-                    `;
-                });
+                // 本地分支组
+                html += '<div class="branch-group">';
+                html += '<div class="group-header">📁 本地分支</div>';
+                
+                if (localBranches.length === 0) {
+                    html += '<div style="padding: 8px 12px; color: #808080; font-size: 12px;">无本地分支</div>';
+                } else {
+                    localBranches.forEach(branch => {
+                        const isCurrent = branch.startsWith('*');
+                        const branchName = branch.replace(/^\*?\s*/, '').trim();
+                        const itemClass = isCurrent ? 'tree-item active' : 'tree-item';
+                        
+                        html += `
+                            <div class="${itemClass}" 
+                                 onclick="selectBranch('${branchName}', 'local')"
+                                 oncontextmenu="showContextMenu(event, '${branchName}', 'local')"
+                                 data-branch="${branchName}"
+                                 data-type="local">
+                                <span class="icon">🌿</span>
+                                <span class="branch-name">${branchName}</span>
+                                ${isCurrent ? '<span class="branch-tag">当前</span>' : ''}
+                            </div>
+                        `;
+                    });
+                }
+                html += '</div>';
+
+                // 远程分支组
+                html += '<div class="branch-group">';
+                html += '<div class="group-header">📡 远程分支</div>';
+                
+                if (remoteBranches.length === 0) {
+                    html += '<div style="padding: 8px 12px; color: #808080; font-size: 12px;">无远程分支</div>';
+                } else {
+                    remoteBranches.forEach(branch => {
+                        const branchName = branch.replace(/^\*?\s*/, '').trim();
+                        const cleanName = branchName.replace('origin/', '');
+                        const isCurrent = currentBranch === cleanName;
+                        const itemClass = isCurrent ? 'tree-item active' : 'tree-item';
+                        
+                        html += `
+                            <div class="${itemClass}" 
+                                 onclick="selectBranch('${branchName}', 'remote')"
+                                 oncontextmenu="showContextMenu(event, '${branchName}', 'remote')"
+                                 data-branch="${branchName}"
+                                 data-type="remote">
+                                <span class="icon">📡</span>
+                                <span class="branch-name">${cleanName}</span>
+                            </div>
+                        `;
+                    });
+                }
+                html += '</div>';
 
                 container.innerHTML = html;
             } catch (error) {
@@ -379,8 +515,168 @@
             }
         }
 
-        async function loadCommits() {
+        async function loadFiles() {
             if (!currentRepoPath) return;
+            
+            const container = document.getElementById('fileList');
+            container.innerHTML = '<div class="loading">加载中...</div>';
+
+            try {
+                if (!window.go || !window.go.main || !window.go.main.App) {
+                    throw new Error('Wails 绑定未就绪');
+                }
+                
+                const result = await window.go.main.App.GitDiffFiles(currentRepoPath);
+                const files = result.split('\n').filter(f => f.trim());
+                
+                if (files.length === 0) {
+                    container.innerHTML = '<div style="padding: 16px; color: #808080; font-size: 13px; text-align: center;">无文件变更</div>';
+                    return;
+                }
+
+                // 分类文件
+                const stagedFiles = [];
+                const unstagedFiles = [];
+                
+                files.forEach(file => {
+                    if (file.length >= 2) {
+                        const status = file.substring(0, 2);
+                        const filename = file.substring(3);
+                        const fileData = {
+                            filename,
+                            status,
+                            staged: status[0] !== ' ' && status[0] !== '?',
+                            unstaged: status[1] !== ' '
+                        };
+                        
+                        if (fileData.staged) {
+                            stagedFiles.push(fileData);
+                        }
+                        if (fileData.unstaged) {
+                            unstagedFiles.push(fileData);
+                        }
+                    }
+                });
+
+                let html = '';
+
+                // 暂存区文件
+                if (stagedFiles.length > 0) {
+                    html += '<div class="file-group">';
+                    html += '<div class="group-header">✅ 暂存区</div>';
+                    stagedFiles.forEach(file => {
+                        const statusClass = getStatusClass(file.status[0]);
+                        const statusIcon = getStatusIcon(file.status[0]);
+                        html += `
+                            <div class="file-item" 
+                                 onclick="selectFile('${file.filename}', true)"
+                                 data-file="${file.filename}">
+                                <span class="icon">${statusIcon}</span>
+                                <span class="file-name">${file.filename}</span>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+
+                // 工作区文件
+                if (unstagedFiles.length > 0) {
+                    html += '<div class="file-group">';
+                    html += '<div class="group-header">📝 工作区</div>';
+                    unstagedFiles.forEach(file => {
+                        const statusClass = getStatusClass(file.status[1]);
+                        const statusIcon = getStatusIcon(file.status[1]);
+                        html += `
+                            <div class="file-item" 
+                                 onclick="selectFile('${file.filename}', false)"
+                                 data-file="${file.filename}">
+                                <span class="icon">${statusIcon}</span>
+                                <span class="file-name">${file.filename}</span>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                }
+
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('加载文件失败:', error);
+                container.innerHTML = `<div class="error-message">加载文件失败: ${error}</div>`;
+            }
+        }
+
+        function getStatusClass(status) {
+            switch (status) {
+                case 'M': return 'status-modified';
+                case 'A': return 'status-added';
+                case 'D': return 'status-deleted';
+                case 'R': return 'status-renamed';
+                default: return '';
+            }
+        }
+
+        function getStatusIcon(status) {
+            switch (status) {
+                case 'M': return '✏️';
+                case 'A': return '➕';
+                case 'D': return '🗑️';
+                case 'R': return '🔄';
+                case '?': return '❓';
+                default: return '📄';
+            }
+        }
+
+        async function selectBranch(branchName, type) {
+            console.log(`选择分支: ${branchName} (${type})`);
+            selectedBranch = branchName;
+            selectedFile = null;
+            
+            // 更新选中状态
+            document.querySelectorAll('.tree-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            const selectedItem = document.querySelector(`[data-branch="${branchName}"]`);
+            if (selectedItem) {
+                selectedItem.classList.add('active');
+            }
+            
+            // 更新标题
+            document.getElementById('selectedInfo').textContent = `- ${branchName}`;
+            
+            // 切换到提交历史标签
+            switchTab('commits');
+            
+            // 加载该分支的提交历史
+            await loadBranchLog(branchName);
+        }
+
+        async function selectFile(filename, staged) {
+            console.log(`选择文件: ${filename} (staged: ${staged})`);
+            selectedFile = { filename, staged };
+            
+            // 更新选中状态
+            document.querySelectorAll('.file-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            const selectedItem = document.querySelector(`[data-file="${filename}"]`);
+            if (selectedItem) {
+                selectedItem.classList.add('active');
+            }
+            
+            // 更新标题
+            document.getElementById('selectedInfo').textContent = `- ${filename}`;
+            
+            // 切换到 diff 标签
+            switchTab('diff');
+            
+            // 加载文件 diff
+            await loadFileDiff(filename, staged);
+        }
+
+        async function loadBranchLog(branchName) {
+            if (!currentRepoPath || !branchName) return;
             
             const container = document.getElementById('commitHistory');
             container.innerHTML = '<div class="loading">加载中...</div>';
@@ -390,7 +686,7 @@
                     throw new Error('Wails 绑定未就绪');
                 }
                 
-                const result = await window.go.main.App.GitLog(currentRepoPath, 100);
+                const result = await window.go.main.App.GitBranchLog(currentRepoPath, branchName, 100);
                 const commits = result.split('\n').filter(c => c.trim());
                 
                 if (commits.length === 0) {
@@ -400,28 +696,15 @@
 
                 let html = '';
                 commits.forEach(commit => {
-                    const parts = commit.split('|');
-                    if (parts.length >= 5) {
-                        const [hash, refs, message, author, date] = parts;
-                        const branchTags = refs.split(',').filter(r => r.trim());
+                    const spaceIndex = commit.indexOf(' ');
+                    if (spaceIndex > 0) {
+                        const hash = commit.substring(0, spaceIndex);
+                        const message = commit.substring(spaceIndex + 1);
                         
-                        let tagsHtml = '';
-                        branchTags.forEach(tag => {
-                            const cleanTag = tag.trim().replace(/[()]/g, '');
-                            if (cleanTag) {
-                                tagsHtml += `<span class="commit-branch">${cleanTag}</span>`;
-                            }
-                        });
-
                         html += `
                             <div class="commit-item">
-                                <div class="commit-header">
-                                    <span class="commit-hash">${hash}</span>
-                                    <span class="commit-author">${author}</span>
-                                    <span class="commit-date">${date}</span>
-                                </div>
-                                <div class="commit-message">${message}</div>
-                                <div class="commit-branches">${tagsHtml}</div>
+                                <span class="commit-hash">${hash}</span>
+                                <span class="commit-message">${message}</span>
                             </div>
                         `;
                     }
@@ -433,6 +716,144 @@
                 container.innerHTML = `<div class="error-message">加载提交历史失败: ${error}</div>`;
             }
         }
+
+        async function loadFileDiff(filename, staged) {
+            if (!currentRepoPath || !filename) return;
+            
+            const container = document.getElementById('diffView');
+            container.innerHTML = '<div class="loading">加载中...</div>';
+
+            try {
+                if (!window.go || !window.go.main || !window.go.main.App) {
+                    throw new Error('Wails 绑定未就绪');
+                }
+                
+                const result = await window.go.main.App.GitFileDiff(currentRepoPath, filename, staged);
+                
+                // 格式化 diff 输出
+                const formattedDiff = formatDiff(result);
+                
+                container.innerHTML = `<div class="diff-content">${formattedDiff}</div>`;
+            } catch (error) {
+                console.error('加载文件 diff 失败:', error);
+                container.innerHTML = `<div class="error-message">加载文件 diff 失败: ${error}</div>`;
+            }
+        }
+
+        function formatDiff(diff) {
+            const lines = diff.split('\n');
+            let html = '';
+            
+            lines.forEach(line => {
+                if (line.startsWith('diff --git')) {
+                    html += `<div class="diff-header">${line}</div>`;
+                } else if (line.startsWith('@@')) {
+                    html += `<div class="diff-hunk">${line}</div>`;
+                } else if (line.startsWith('+') && !line.startsWith('+++')) {
+                    html += `<div class="diff-add">${escapeHtml(line)}</div>`;
+                } else if (line.startsWith('-') && !line.startsWith('---')) {
+                    html += `<div class="diff-remove">${escapeHtml(line)}</div>`;
+                } else {
+                    html += `<div>${escapeHtml(line)}</div>`;
+                }
+            });
+            
+            return html;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            const tabCommits = document.getElementById('tabCommits');
+            const tabDiff = document.getElementById('tabDiff');
+            const commitHistory = document.getElementById('commitHistory');
+            const diffView = document.getElementById('diffView');
+            
+            if (tab === 'commits') {
+                tabCommits.classList.add('active');
+                tabDiff.classList.remove('active');
+                commitHistory.style.display = 'block';
+                diffView.style.display = 'none';
+                document.getElementById('selectedInfo').textContent = selectedBranch ? `- ${selectedBranch}` : '';
+            } else {
+                tabCommits.classList.remove('active');
+                tabDiff.classList.add('active');
+                commitHistory.style.display = 'none';
+                diffView.style.display = 'block';
+                document.getElementById('selectedInfo').textContent = selectedFile ? `- ${selectedFile.filename}` : '';
+            }
+        }
+
+        function showContextMenu(event, branchName, type) {
+            event.preventDefault();
+            
+            contextMenuTarget = { branchName, type };
+            
+            const menu = document.getElementById('contextMenu');
+            const menuCheckout = document.getElementById('menuCheckout');
+            
+            const cleanName = branchName.replace('origin/', '');
+            const isCurrent = currentBranch === cleanName;
+            
+            if (isCurrent) {
+                menuCheckout.classList.add('disabled');
+            } else {
+                menuCheckout.classList.remove('disabled');
+            }
+            
+            menu.style.display = 'block';
+            menu.style.left = event.pageX + 'px';
+            menu.style.top = event.pageY + 'px';
+        }
+
+        function hideContextMenu() {
+            document.getElementById('contextMenu').style.display = 'none';
+            contextMenuTarget = null;
+        }
+
+        async function checkoutBranch() {
+            if (!contextMenuTarget) return;
+            
+            const { branchName, type } = contextMenuTarget;
+            let checkoutBranch = branchName;
+            
+            if (type === 'remote') {
+                checkoutBranch = branchName.replace('origin/', '');
+                if (!confirm(`要从远程分支 "${checkoutBranch}" 创建并切换到本地分支吗？`)) {
+                    hideContextMenu();
+                    return;
+                }
+            } else {
+                if (!confirm(`确定要切换到分支 "${checkoutBranch}" 吗？`)) {
+                    hideContextMenu();
+                    return;
+                }
+            }
+
+            try {
+                await window.go.main.App.GitCheckout(currentRepoPath, checkoutBranch);
+                await refreshData();
+                alert(`已切换到分支 ${checkoutBranch}`);
+            } catch (error) {
+                alert(`切换分支失败: ${error}`);
+            }
+            
+            hideContextMenu();
+        }
+
+        document.addEventListener('click', hideContextMenu);
+
+        document.getElementById('menuCheckout').addEventListener('click', function() {
+            if (!this.classList.contains('disabled')) {
+                checkoutBranch();
+            }
+        });
 
         async function loadCurrentBranch() {
             if (!currentRepoPath) return;
@@ -446,19 +867,6 @@
                 currentBranch = result.trim();
             } catch (error) {
                 console.error('获取当前分支失败:', error);
-            }
-        }
-
-        async function switchBranch(branchName) {
-            if (!currentRepoPath) return;
-            if (!confirm(`确定要切换到分支 "${branchName}" 吗？`)) return;
-
-            try {
-                await window.go.main.App.GitCheckout(currentRepoPath, branchName);
-                await refreshData();
-                alert(`已切换到分支 ${branchName}`);
-            } catch (error) {
-                alert(`切换分支失败: ${error}`);
             }
         }
 
@@ -480,49 +888,33 @@
             }
         }
 
-        async function showStatus() {
-            if (!currentRepoPath) {
-                alert('请先加载仓库');
-                return;
-            }
-
-            try {
-                const result = await window.go.main.App.GitStatus(currentRepoPath);
-                alert('Git 状态:\n\n' + result);
-            } catch (error) {
-                alert(`获取状态失败: ${error}`);
-            }
-        }
-
         async function refreshBranches() {
             await loadBranches();
         }
 
-        async function refreshCommits() {
-            await loadCommits();
+        async function refreshFiles() {
+            await loadFiles();
         }
 
         function updateStatusBar() {
             const indicator = document.getElementById('statusIndicator');
-            const currentBranchEl = document.getElementById('currentBranch');
+            const statusText = document.getElementById('statusText');
             const repoInfo = document.getElementById('repoInfo');
 
             if (currentRepoPath) {
                 indicator.className = 'status-indicator connected';
-                currentBranchEl.textContent = currentBranch || '未知分支';
+                statusText.textContent = currentBranch ? `当前分支: ${currentBranch}` : '未知分支';
                 repoInfo.textContent = currentRepoPath;
             } else {
                 indicator.className = 'status-indicator disconnected';
-                currentBranchEl.textContent = '未加载仓库';
+                statusText.textContent = '未加载仓库';
                 repoInfo.textContent = '';
             }
         }
 
-        // 页面加载时自动填充默认路径并等待 Wails 初始化
         window.onload = function() {
             document.getElementById('repoPath').value = 'D:\\workspace\\go-git-client-window';
             
-            // 等待 Wails 绑定就绪
             waitForWails(() => {
                 console.log('Wails 已就绪，可以开始使用');
             });
