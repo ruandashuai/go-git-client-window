@@ -235,22 +235,49 @@
         .refresh-btn:hover {
             background-color: #4e5254;
         }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 4px;
+            color: white;
+            font-size: 14px;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .notification.success {
+            background-color: #6a8759;
+        }
+        .notification.error {
+            background-color: #cc7832;
+        }
+        .notification.info {
+            background-color: #4a6d8c;
+        }
     </style>
+    <div id="notification" class="notification"></div>
 </head>
 <body>
     <div class="app-container">
         <div class="toolbar">
-            <input type="text" id="repoPath" placeholder="输入 Git 仓库路径" value="">
+            <input type="text" id="repoPath" placeholder="Enter Git repository path" value="">
             <button onclick="loadRepo()">加载仓库</button>
-            <button onclick="refreshData()">刷新</button>
+            <button onclick="refreshData()">Refresh</button>
         </div>
 
         <div class="main-content">
             <div class="sidebar">
                 <div class="sidebar-header">
-                    <span>🌳 分支树</span>
+                    <span>🌳 Branch Tree</span>
                     <div class="action-buttons">
-                        <button onclick="createBranch()">新建分支</button>
+                        <button onclick="createBranch()">New Branch</button>
                         <button class="refresh-btn" onclick="refreshBranches()">↻</button>
                     </div>
                 </div>
@@ -261,9 +288,9 @@
 
             <div class="commit-history">
                 <div class="sidebar-header" style="background: transparent; border-bottom: 1px solid #4e5254; margin-bottom: 16px;">
-                    <span>📝 提交历史</span>
+                    <span>📝 Commit History</span>
                     <div class="action-buttons">
-                        <button onclick="showStatus()">查看状态</button>
+                        <button onclick="showStatus()">View Status</button>
                         <button class="refresh-btn" onclick="refreshCommits()">↻</button>
                     </div>
                 </div>
@@ -287,10 +314,36 @@
         let currentRepoPath = '';
         let currentBranch = '';
 
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            // 根据类型设置背景色
+            switch(type) {
+                case 'success':
+                    notification.style.backgroundColor = '#6a8759';
+                    break;
+                case 'error':
+                    notification.style.backgroundColor = '#cc7832';
+                    break;
+                case 'info':
+                    notification.style.backgroundColor = '#4a6d8c';
+                    break;
+                default:
+                    notification.style.backgroundColor = '#4a6d8c';
+            }
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
         async function loadRepo() {
             const path = document.getElementById('repoPath').value.trim();
             if (!path) {
-                alert('请输入仓库路径');
+                showNotification('Please enter a repository path', 'error');
                 return;
             }
             currentRepoPath = path;
@@ -320,7 +373,7 @@
                 const branches = result.split('\n').filter(b => b.trim());
                 
                 if (branches.length === 0) {
-                    container.innerHTML = '<div class="error-message">未找到分支</div>';
+                    container.innerHTML = '<div class="error-message">No branches found</div>';
                     return;
                 }
 
@@ -334,7 +387,7 @@
                     const icon = isRemote ? '📡' : '🌿';
                     const tagClass = isCurrent ? 'branch-tag' : 'remote-tag';
                     const itemClass = isCurrent ? 'tree-item active' : 'tree-item';
-                    const tagText = isCurrent ? '当前' : (isRemote ? '远程' : '');
+                    const tagText = isCurrent ? 'Current' : (isRemote ? 'Remote' : '');
 
                     html += `
                         <div class="${itemClass}" onclick="switchBranch('${branchName}')">
@@ -347,7 +400,7 @@
 
                 container.innerHTML = html;
             } catch (error) {
-                container.innerHTML = `<div class="error-message">加载分支失败: ${error}</div>`;
+                container.innerHTML = `<div class="error-message">Failed to load branches: ${error}</div>`;
             }
         }
 
@@ -362,7 +415,7 @@
                 const commits = result.split('\n').filter(c => c.trim());
                 
                 if (commits.length === 0) {
-                    container.innerHTML = '<div class="error-message">未找到提交记录</div>';
+                    container.innerHTML = '<div class="error-message">No commit records found</div>';
                     return;
                 }
 
@@ -397,7 +450,7 @@
 
                 container.innerHTML = html;
             } catch (error) {
-                container.innerHTML = `<div class="error-message">加载提交历史失败: ${error}</div>`;
+                container.innerHTML = `<div class="error-message">Failed to load commit history: ${error}</div>`;
             }
         }
 
@@ -408,52 +461,52 @@
                 const result = await window.go.main.App.GitGetCurrentBranch(currentRepoPath);
                 currentBranch = result.trim();
             } catch (error) {
-                console.error('获取当前分支失败:', error);
+                console.error('Failed to get current branch:', error);
             }
         }
 
         async function switchBranch(branchName) {
             if (!currentRepoPath) return;
-            if (!confirm(`确定要切换到分支 "${branchName}" 吗？`)) return;
+            if (!confirm(`Are you sure to switch to branch "${branchName}"?`)) return;
 
             try {
                 await window.go.main.App.GitCheckout(currentRepoPath, branchName);
                 await refreshData();
-                alert(`已切换到分支 ${branchName}`);
+                showNotification(`Switched to branch ${branchName}`, 'success');
             } catch (error) {
-                alert(`切换分支失败: ${error}`);
+                showNotification(`Failed to switch branch: ${error}`, 'error');
             }
         }
 
         async function createBranch() {
             if (!currentRepoPath) {
-                alert('请先加载仓库');
+                showNotification('Please load a repository first', 'error');
                 return;
             }
 
-            const branchName = prompt('请输入新分支名称:');
+            const branchName = prompt('Please enter new branch name:');
             if (!branchName) return;
 
             try {
                 await window.go.main.App.GitCreateBranch(currentRepoPath, branchName);
                 await refreshData();
-                alert(`已创建并切换到分支 ${branchName}`);
+                showNotification(`Created and switch to branch ${branchName}`, 'success');
             } catch (error) {
-                alert(`创建分支失败: ${error}`);
+                showNotification(`Failed to create branch: ${error}`, 'error');
             }
         }
 
         async function showStatus() {
             if (!currentRepoPath) {
-                alert('请先加载仓库');
+                showNotification('Please load a repository first', 'error');
                 return;
             }
 
             try {
                 const result = await window.go.main.App.GitStatus(currentRepoPath);
-                alert('Git 状态:\n\n' + result);
+                showNotification('Git Status:\n\n' + result, 'info');
             } catch (error) {
-                alert(`获取状态失败: ${error}`);
+                showNotification(`Failed to get status: ${error}`, 'error');
             }
         }
 
@@ -483,7 +536,7 @@
 
         // 页面加载时自动填充默认路径
         window.onload = function() {
-            document.getElementById('repoPath').value = 'D:\\workspace\\go-git-client-window';
+            document.getElementById('repoPath').value = 'D:/workspace/go-git-client-window';
         };
     </script>
 </body>

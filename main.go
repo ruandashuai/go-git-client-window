@@ -49,7 +49,9 @@ func (a *App) GitInit(path string) (string, error) {
 func (a *App) GitStatus(path string) (string, error) {
 	return git.GitStatus(path)
 }
-
+func (a App) GitBranch(path string) (string, error) {
+	return git.GitBranch(path)
+}
 func main() {
 	app := NewApp()
 
@@ -58,7 +60,7 @@ func main() {
 		Width:             800,
 		Height:            600,
 		DisableResize:     false,
-		Fullscreen:        true,
+		Fullscreen:        false,
 		Frameless:         false,
 		MinWidth:          800,
 		MinHeight:         800,
