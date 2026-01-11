@@ -47,3 +47,11 @@ type GitRemoteInfo struct {
 	Name string `json:"name"`
 	URL  string `json:"url"`
 }
+
+// FileDiff 文件差异信息
+type FileDiff struct {
+	Filename   string   `json:"filename"`
+	OldContent string   `json:"oldContent"`
+	NewContent string   `json:"newContent"`
+	Changes    []string `json:"changes"`
+}

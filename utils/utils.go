@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"os"
 	"os/exec"
 	"runtime"
@@ -36,4 +37,10 @@ func OpenInBrowser(url string) error {
 		cmd = exec.Command("xdg-open", url)
 	}
 	return cmd.Start()
+}
+
+// ToJsonString 将任意对象转换为JSON字符串
+func ToJsonString(v interface{}) string {
+	data, _ := json.Marshal(v)
+	return string(data)
 }
