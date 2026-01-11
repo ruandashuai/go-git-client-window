@@ -5,6 +5,7 @@
   "frontend:build": "npm run build",
   "frontend:install": "npm install",
   "frontend:dev": "npm run dev",
+  "devserverurl": "",
   "info": {
     "companyName": "Git Client",
     "productName": "Go Git Client",
