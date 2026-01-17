@@ -167,6 +167,8 @@ export default {
 
       try {
         const result = await window.go.main.App.GitBranch(repoPath.value)
+        console.log('Branch result:', result)
+        // 按照是否远程分支进行分组
         const branchList = result.split('\n').filter(b => b.trim())
         
         // Parse branches and create branch objects
