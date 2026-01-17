@@ -26,7 +26,6 @@ tmp/
 temp/
 
 # Wails specific - only ignore generated dist, not source bindings
-/frontend/dist/
 
 # OS generated files
 Thumbs.db
@@ -35,3 +34,4 @@ ehthumbs.db
 go-git-client.exe
 frontend/node_modules
 frontend/dist
+frontend/src/wailsjs
