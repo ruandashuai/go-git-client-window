@@ -4,8 +4,10 @@
   "wailsjsdir": "frontend/src",
   "frontend:build": "npm run build",
   "frontend:install": "npm install",
-  "frontend:dev": "npm run dev",
-  "devserverurl": "",
+  "frontend:dev": "",
+  "frontend:dev:watcher": "npm run dev",
+  "frontend:dev:serverUrl": "http://localhost:3000",
+  "workingdir": "frontend",
   "info": {
     "companyName": "Git Client",
     "productName": "Go Git Client",
