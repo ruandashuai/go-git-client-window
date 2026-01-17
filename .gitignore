@@ -33,8 +33,8 @@ Thumbs.db
 ehthumbs.db
 
 go-git-client.exe
-frontend/node_modules
-frontend/dist
+frontend/node_modules/
+frontend/dist/
 frontend/src/wailsjs
 
 # Ignore package.json checksum file
