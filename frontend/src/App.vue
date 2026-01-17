@@ -96,6 +96,7 @@
                   'branch-item',
                   { 'active': branch.current, 'current': branch.current }
                 ]"
+                  @dblclick="showBranchHistory(branch.name)"
                   @contextmenu.prevent="openBranchContextMenu($event, branch, 'local')"
               >
                 <div class="branch-info">
@@ -142,6 +143,7 @@
                   v-for="branch in filteredRemoteBranches"
                   :key="'remote-' + branch.name"
                   :class="['branch-item', { 'active': branch.current }]"
+                  @dblclick="showBranchHistory(branch.name.replace('origin/', ''))"
                   @contextmenu.prevent="openBranchContextMenu($event, branch, 'remote')"
               >
                 <div class="branch-info">
@@ -299,11 +301,6 @@
             <span class="history-icon">📜</span>
             提交历史
           </h2>
-          <div class="panel-actions">
-            <button @click="refreshCommits" class="icon-btn" title="刷新">
-              🔄
-            </button>
-          </div>
         </div>
 
         <div class="panel-content">
@@ -823,10 +820,172 @@ export default {
 
     // 右键点击分支打开上下文菜单
     const openBranchContextMenu = (event, branch, type) => {
-      // 在实际应用中，这里会打开一个上下文菜单
-      console.log(`右键点击分支 ${branch.name} (${type})`)
+      // 创建右键菜单
+      const menu = document.createElement('div');
+      menu.className = 'context-menu';
+      menu.style.position = 'fixed';
+      menu.style.left = event.clientX + 'px';
+      menu.style.top = event.clientY + 'px';
+      menu.style.zIndex = '1000';
+      menu.style.backgroundColor = '#3c3f41';
+      menu.style.border = '1px solid #4e5254';
+      menu.style.borderRadius = '4px';
+      menu.style.padding = '4px 0';
+      menu.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+      menu.style.minWidth = '120px';
+      
+      // 清除任何现有的右键菜单
+      document.querySelectorAll('.context-menu').forEach(el => el.remove());
+      
+      // 对于所有分支，都提供查看历史选项
+      const historyItem = document.createElement('div');
+      historyItem.className = 'context-menu-item';
+      historyItem.innerHTML = '📜 查看提交历史';
+      historyItem.style.padding = '8px 12px';
+      historyItem.style.cursor = 'pointer';
+      historyItem.style.color = '#a9b7c6';
+      historyItem.style.fontSize = '12px';
+      historyItem.onmouseover = () => historyItem.style.backgroundColor = '#4e5254';
+      historyItem.onmouseout = () => historyItem.style.backgroundColor = 'transparent';
+      historyItem.onclick = () => {
+        showBranchHistory(branch.name);
+        document.body.removeChild(menu);
+      };
+      menu.appendChild(historyItem);
+      
+      // 添加分隔线
+      const separator = document.createElement('hr');
+      separator.style.margin = '4px 0';
+      separator.style.borderColor = '#4e5254';
+      separator.style.borderStyle = 'solid';
+      menu.appendChild(separator);
+      
+      // 非当前分支的操作
+      if (!branch.current) {
+        // 切换分支选项
+        const switchItem = document.createElement('div');
+        switchItem.className = 'context-menu-item';
+        switchItem.innerHTML = '🔄 切换到此分支';
+        switchItem.style.padding = '8px 12px';
+        switchItem.style.cursor = 'pointer';
+        switchItem.style.color = '#a9b7c6';
+        switchItem.style.fontSize = '12px';
+        switchItem.onmouseover = () => switchItem.style.backgroundColor = '#4e5254';
+        switchItem.onmouseout = () => switchItem.style.backgroundColor = 'transparent';
+        switchItem.onclick = () => {
+          switchBranch(branch.name);
+          document.body.removeChild(menu);
+        };
+        menu.appendChild(switchItem);
+        
+        // 删除分支选项
+        const deleteItem = document.createElement('div');
+        deleteItem.className = 'context-menu-item';
+        deleteItem.innerHTML = '❌ 删除分支';
+        deleteItem.style.padding = '8px 12px';
+        deleteItem.style.cursor = 'pointer';
+        deleteItem.style.color = '#a9b7c6';
+        deleteItem.style.fontSize = '12px';
+        deleteItem.onmouseover = () => deleteItem.style.backgroundColor = '#4e5254';
+        deleteItem.onmouseout = () => deleteItem.style.backgroundColor = 'transparent';
+        deleteItem.onclick = () => {
+          deleteBranch(branch.name);
+          document.body.removeChild(menu);
+        };
+        menu.appendChild(deleteItem);
+      } else {
+        // 当前分支的操作
+        const mergeItem = document.createElement('div');
+        mergeItem.className = 'context-menu-item';
+        mergeItem.innerHTML = '🔀 合并其他分支';
+        mergeItem.style.padding = '8px 12px';
+        mergeItem.style.cursor = 'pointer';
+        mergeItem.style.color = '#a9b7c6';
+        mergeItem.style.fontSize = '12px';
+        mergeItem.onmouseover = () => mergeItem.style.backgroundColor = '#4e5254';
+        mergeItem.onmouseout = () => mergeItem.style.backgroundColor = 'transparent';
+        mergeItem.onclick = () => {
+          alert('合并功能将在后续版本中实现');
+          document.body.removeChild(menu);
+        };
+        menu.appendChild(mergeItem);
+      }
+      
+      // 如果是远程分支，添加拉取到本地选项
+      if (type === 'remote') {
+        const pullItem = document.createElement('div');
+        pullItem.className = 'context-menu-item';
+        pullItem.innerHTML = '📥 拉取到本地';
+        pullItem.style.padding = '8px 12px';
+        pullItem.style.cursor = 'pointer';
+        pullItem.style.color = '#a9b7c6';
+        pullItem.style.fontSize = '12px';
+        pullItem.onmouseover = () => pullItem.style.backgroundColor = '#4e5254';
+        pullItem.onmouseout = () => pullItem.style.backgroundColor = 'transparent';
+        pullItem.onclick = () => {
+          // 创建本地同名分支并跟踪远程分支
+          createBranchFromRemote(branch.name);
+          document.body.removeChild(menu);
+        };
+        menu.appendChild(pullItem);
+      }
+      
+      // 添加到页面
+      document.body.appendChild(menu);
+      
+      // 点击其他地方关闭菜单
+      const closeMenu = (e) => {
+        if (!menu.contains(e.target)) {
+          if (document.body.contains(menu)) {
+            document.body.removeChild(menu);
+          }
+          document.removeEventListener('click', closeMenu);
+        }
+      };
+      setTimeout(() => {
+        document.addEventListener('click', closeMenu);
+      }, 100);
     }
 
+    // 创建本地分支跟踪远程分支
+    const createBranchFromRemote = async (remoteBranchName) => {
+      if (!repoPath.value) {
+        showNotification('请先加载仓库', 'error');
+        return;
+      }
+      
+      // 从远程分支名中提取本地分支名 (例如，从 'origin/main' 提取 'main')
+      const localBranchName = remoteBranchName.replace('origin/', '').replace('remotes/', '');
+      
+      if (!confirm(`确定要从远程分支 "${remoteBranchName}" 创建本地分支 "${localBranchName}" 吗？`)) {
+        return;
+      }
+      
+      try {
+        // 检查本地分支是否已存在
+        const localExists = localBranches.value.some(branch => branch.name === localBranchName);
+        if (localExists) {
+          if (!confirm(`本地分支 "${localBranchName}" 已存在，是否切换到该分支？`)) {
+            return;
+          }
+          await switchBranch(localBranchName);
+          return;
+        }
+        
+        // 创建本地分支并跟踪远程分支
+        await window.go.main.App.GitCreateBranch(repoPath.value, localBranchName);
+        await window.go.main.App.GitCheckout(repoPath.value, localBranchName);
+        
+        // 拉取远程分支的最新内容
+        await window.go.main.App.GitPull(repoPath.value, localBranchName);
+        
+        await refreshData();
+        showNotification(`已创建本地分支 "${localBranchName}" 并切换到该分支`, 'success');
+      } catch (error) {
+        showNotification(`创建分支失败: ${error}`, 'error');
+      }
+    };
+    
     // 删除分支
     const deleteBranch = async (branchName) => {
       if (!repoPath.value) return
@@ -864,6 +1023,26 @@ export default {
       const hue = (index * 137.5) % 360
       return {
         borderColor: `hsl(${hue}, 70%, 60%)`
+      }
+    }
+    
+    // 显示指定分支的提交历史
+    const showBranchHistory = async (branchName) => {
+      if (!repoPath.value) {
+        showNotification('请先加载仓库', 'error');
+        return;
+      }
+      
+      try {
+        commitsLoading.value = true;
+        // 获取指定分支的提交历史
+        const result = await window.go.main.App.GitBranchLog(repoPath.value, branchName, 50);
+        commits.value = JSON.parse(result);
+        showNotification(`已加载分支 "${branchName}" 的提交历史`, 'info');
+      } catch (error) {
+        showNotification(`加载分支 "${branchName}" 历史失败: ${error}`, 'error');
+      } finally {
+        commitsLoading.value = false;
       }
     }
 
@@ -931,6 +1110,7 @@ export default {
       refreshStatus,
       switchBranch,
       createBranch,
+      createBranchFromRemote,
       showStatus,
       refreshBranches,
       refreshCommits,
@@ -943,6 +1123,8 @@ export default {
       pullChanges,
       pushChanges,
       selectCommit,
+      showBranchHistory,
+      openBranchContextMenu,
       getCommitColor,
       getCommitLineColor,
       truncateText,
