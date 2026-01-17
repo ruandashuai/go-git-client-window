@@ -2,10 +2,17 @@
   "name": "go-git-client-frontend",
   "version": "1.0.0",
   "description": "Frontend for Go Git Client",
-  "main": "index.js",
   "scripts": {
-    "dev": "echo \"No frontend build step required for simple Wails app\"",
-    "build": "echo \"No frontend build step required for simple Wails app\""
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.4.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.5.0",
+    "vite": "^5.0.0"
   },
   "author": "",
   "license": "ISC"
