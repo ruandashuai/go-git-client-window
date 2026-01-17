@@ -15,6 +15,7 @@
 # IDE and editor files
 /.idea/
 .idea
+*.iml
 .vscode/
 *.swp
 *.swo
@@ -35,3 +36,6 @@ go-git-client.exe
 frontend/node_modules
 frontend/dist
 frontend/src/wailsjs
+
+# Ignore package.json checksum file
+frontend/package.json.md5
