@@ -2,11 +2,15 @@ package core
 
 import (
 	"fmt"
+	"log/slog"
+	"os"
 	"os/exec"
 	"strings"
 
 	"go-git-client-window/models"
 )
+
+var logger = slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 // GitCoreService Git核心服务
 type GitCoreService struct{}
@@ -55,9 +59,9 @@ func ParseBranchLine(branchLine string) (name string, isCurrent, isRemote bool) 
 	return name, isCurrent, isRemote
 }
 
-// ParseCommitLine 解析提交行 (格式: hash|refs|message|author|date)
-func ParseCommitLine(commitLine string) (*models.GitCommit, error) {
-	parts := strings.Split(commitLine, "|")
+// ParseCommitLine 解析提交行 (格式: hash\x1frefs\x1fmessage\x1fauthor\x1fdate)
+func ParseCommitLine(commitLine string) (*models.GitCommitRecord, error) {
+	parts := strings.Split(commitLine, "\x1f")
 	if len(parts) < 5 {
 		return nil, fmt.Errorf("invalid commit line format: %s", commitLine)
 	}
@@ -70,19 +74,24 @@ func ParseCommitLine(commitLine string) (*models.GitCommit, error) {
 
 	var branches []string
 	if refs != "" {
-		branches = strings.Split(refs, ",")
-		for i, branch := range branches {
-			branches[i] = strings.TrimSpace(strings.Trim(branch, "()"))
+		refsParts := strings.Split(refs, ",")
+		branches = make([]string, 0, len(refsParts)) // 预分配容量提高性能
+		for _, ref := range refsParts {
+			branch := strings.TrimSpace(strings.Trim(ref, "()"))
+			if branch != "" { // 过滤空字符串
+				branches = append(branches, branch)
+			}
 		}
 	}
 
-	return &models.GitCommit{
+	commit := models.GitCommitRecord{
 		Hash:     hash,
 		Message:  message,
 		Author:   author,
 		Date:     date,
 		Branches: branches,
-	}, nil
+	}
+	return &commit, nil
 }
 
 // GetBranches 获取所有分支（本地和远程）
@@ -185,27 +194,25 @@ func (s *GitCoreService) GetRemoteBranches(repoPath string) ([]models.GitBranch,
 }
 
 // GetBranchLog 获取分支提交日志
-func (s *GitCoreService) GetBranchLog(repoPath, branch string, limit int) ([]models.GitCommit, error) {
-	if strings.TrimSpace(repoPath) == "" {
-		return nil, fmt.Errorf("path cannot be empty")
-	}
-
+func (s *GitCoreService) GetBranchLog(repoPath, branch string, limit int) ([]models.GitCommitRecord, error) {
 	limitStr := fmt.Sprintf("-%d", limit)
-	output, err := ExecuteGitCommand(repoPath, "log", "--pretty=format:%H|%D|%s|%an|%ad", "--date=iso", limitStr, branch)
+	output, err := ExecuteGitCommand(repoPath, "log", "--pretty=format:%H\x1f%D\x1f%s\x1f%an\x1f%ad", "--date=iso", limitStr, branch)
 	if err != nil {
 		return nil, err
 	}
 
 	lines := strings.Split(output, "\n")
-	var commits []models.GitCommit
+	var commits []models.GitCommitRecord
 
 	for _, line := range lines {
+		//trim 一下每行
 		if strings.TrimSpace(line) == "" {
 			continue
 		}
-
+		//解析每行
 		commit, err := ParseCommitLine(line)
 		if err != nil {
+			logger.Error("parse commit line error", "error", err)
 			continue
 		}
 		commits = append(commits, *commit)
@@ -215,7 +222,7 @@ func (s *GitCoreService) GetBranchLog(repoPath, branch string, limit int) ([]mod
 }
 
 // GetCommits 获取提交历史
-func (s *GitCoreService) GetCommits(repoPath string, limit int) ([]models.GitCommit, error) {
+func (s *GitCoreService) GetCommits(repoPath string, limit int) ([]models.GitCommitRecord, error) {
 	return s.GetLog(repoPath, limit)
 }
 
@@ -246,16 +253,16 @@ func (s *GitCoreService) GetStashes(repoPath string) ([]models.GitStash, error) 
 
 // GetCurrentBranch 获取当前分支
 func (s *GitCoreService) GetCurrentBranch(repoPath string) (string, error) {
-	if strings.TrimSpace(repoPath) == "" {
-		return "", fmt.Errorf("path cannot be empty")
-	}
-
 	output, err := ExecuteGitCommand(repoPath, "rev-parse", "--abbrev-ref", "HEAD")
 	if err != nil {
 		return "", err
 	}
 
-	return strings.TrimSpace(output), nil
+	branch := strings.TrimSpace(output)
+	if branch == "HEAD" {
+		return "", fmt.Errorf("no branch is currently checked out (detached HEAD)")
+	}
+	return branch, nil
 }
 
 // CheckoutBranch 切换分支
@@ -512,7 +519,7 @@ func (s *GitCoreService) GetFileDiff(repoPath, filename string, staged bool) ([]
 }
 
 // GetLog 获取Git提交历史
-func (s *GitCoreService) GetLog(repoPath string, limit int) ([]models.GitCommit, error) {
+func (s *GitCoreService) GetLog(repoPath string, limit int) ([]models.GitCommitRecord, error) {
 	if strings.TrimSpace(repoPath) == "" {
 		return nil, fmt.Errorf("path cannot be empty")
 	}
@@ -524,7 +531,7 @@ func (s *GitCoreService) GetLog(repoPath string, limit int) ([]models.GitCommit,
 	}
 
 	lines := strings.Split(output, "\n")
-	var commits []models.GitCommit
+	var commits []models.GitCommitRecord
 
 	for _, line := range lines {
 		if strings.TrimSpace(line) == "" {

@@ -1,5 +1,9 @@
 package models
 
+import (
+	"encoding/json"
+)
+
 // GitFileStatus 文件状态
 type GitFileStatus struct {
 	Filename string `json:"filename"`
@@ -7,13 +11,18 @@ type GitFileStatus struct {
 	Staged   bool   `json:"staged"`
 }
 
-// GitCommit 提交信息
-type GitCommit struct {
+// GitCommitRecord 提交信息
+type GitCommitRecord struct {
 	Hash     string   `json:"hash"`
 	Message  string   `json:"message"`
 	Author   string   `json:"author"`
 	Date     string   `json:"date"`
 	Branches []string `json:"branches"`
+}
+
+func (c GitCommitRecord) String() string {
+	jsonString, _ := json.Marshal(c)
+	return string(jsonString)
 }
 
 // GitBranch 分支信息
