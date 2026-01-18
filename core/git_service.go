@@ -18,6 +18,10 @@ func NewGitCoreService() *GitCoreService {
 
 // ExecuteGitCommand 执行 Git 命令
 func ExecuteGitCommand(dir string, args ...string) (string, error) {
+	//在这里判断dir不能是nil或者空字符串
+	if strings.TrimSpace(dir) == "" {
+		return "", fmt.Errorf("dir cannot be empty")
+	}
 	cmd := exec.Command("git", args...)
 	cmd.Dir = dir
 
@@ -83,7 +87,7 @@ func ParseCommitLine(commitLine string) (*models.GitCommit, error) {
 
 // GetBranches 获取所有分支（本地和远程）
 func (s *GitCoreService) GetBranches(repoPath string) ([]models.GitBranch, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return nil, fmt.Errorf("path cannot be empty")
 	}
 
@@ -116,7 +120,7 @@ func (s *GitCoreService) GetBranches(repoPath string) ([]models.GitBranch, error
 
 // GetLocalBranches 获取本地分支
 func (s *GitCoreService) GetLocalBranches(repoPath string) ([]models.GitBranch, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return nil, fmt.Errorf("path cannot be empty")
 	}
 
@@ -149,7 +153,7 @@ func (s *GitCoreService) GetLocalBranches(repoPath string) ([]models.GitBranch, 
 
 // GetRemoteBranches 获取远程分支
 func (s *GitCoreService) GetRemoteBranches(repoPath string) ([]models.GitBranch, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return nil, fmt.Errorf("path cannot be empty")
 	}
 
@@ -182,7 +186,7 @@ func (s *GitCoreService) GetRemoteBranches(repoPath string) ([]models.GitBranch,
 
 // GetBranchLog 获取分支提交日志
 func (s *GitCoreService) GetBranchLog(repoPath, branch string, limit int) ([]models.GitCommit, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return nil, fmt.Errorf("path cannot be empty")
 	}
 
@@ -242,7 +246,7 @@ func (s *GitCoreService) GetStashes(repoPath string) ([]models.GitStash, error) 
 
 // GetCurrentBranch 获取当前分支
 func (s *GitCoreService) GetCurrentBranch(repoPath string) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
@@ -261,7 +265,7 @@ func (s *GitCoreService) CheckoutBranch(repoPath, branchName string) (string, er
 
 // CreateBranch 创建分支
 func (s *GitCoreService) CreateBranch(repoPath, branchName string) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
@@ -285,7 +289,7 @@ func (s *GitCoreService) AddFiles(repoPath, files string) (string, error) {
 
 // StageFile 暂存文件
 func (s *GitCoreService) StageFile(repoPath, filename string) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
@@ -299,7 +303,7 @@ func (s *GitCoreService) StageFile(repoPath, filename string) (string, error) {
 
 // UnstageFile 取消暂存文件
 func (s *GitCoreService) UnstageFile(repoPath, filename string) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
@@ -313,7 +317,7 @@ func (s *GitCoreService) UnstageFile(repoPath, filename string) (string, error) 
 
 // Push 推送到远程
 func (s *GitCoreService) Push(repoPath, branch string, force bool) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
@@ -333,7 +337,7 @@ func (s *GitCoreService) Push(repoPath, branch string, force bool) (string, erro
 
 // Pull 从远程拉取
 func (s *GitCoreService) Pull(repoPath, branch string) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
@@ -347,7 +351,7 @@ func (s *GitCoreService) Pull(repoPath, branch string) (string, error) {
 
 // Fetch 获取远程更新
 func (s *GitCoreService) Fetch(repoPath string) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
@@ -361,7 +365,7 @@ func (s *GitCoreService) Fetch(repoPath string) (string, error) {
 
 // Merge 合并分支
 func (s *GitCoreService) Merge(repoPath, branch string) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
@@ -375,7 +379,7 @@ func (s *GitCoreService) Merge(repoPath, branch string) (string, error) {
 
 // Init 初始化仓库
 func (s *GitCoreService) Init(repoPath string) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
@@ -389,7 +393,7 @@ func (s *GitCoreService) Init(repoPath string) (string, error) {
 
 // Status 获取仓库状态
 func (s *GitCoreService) Status(repoPath string) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
@@ -403,7 +407,7 @@ func (s *GitCoreService) Status(repoPath string) (string, error) {
 
 // Clone 克隆仓库
 func (s *GitCoreService) Clone(repoURL, targetPath string) (string, error) {
-	if repoURL == "" || targetPath == "" {
+	if strings.TrimSpace(repoURL) == "" || strings.TrimSpace(targetPath) == "" {
 		return "", fmt.Errorf("repo URL and target path cannot be empty")
 	}
 
@@ -418,7 +422,7 @@ func (s *GitCoreService) Clone(repoURL, targetPath string) (string, error) {
 
 // Add 添加文件到暂存区
 func (s *GitCoreService) Add(repoPath, files string) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
@@ -432,7 +436,7 @@ func (s *GitCoreService) Add(repoPath, files string) (string, error) {
 
 // Commit 提交更改
 func (s *GitCoreService) Commit(repoPath, message string) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
@@ -446,7 +450,7 @@ func (s *GitCoreService) Commit(repoPath, message string) (string, error) {
 
 // GetDiffFiles 获取工作区和暂存区的变更文件列表
 func (s *GitCoreService) GetDiffFiles(repoPath string) ([]models.GitFileStatus, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return nil, fmt.Errorf("path cannot be empty")
 	}
 
@@ -479,7 +483,7 @@ func (s *GitCoreService) GetDiffFiles(repoPath string) ([]models.GitFileStatus, 
 
 // GetFileDiff 查看指定文件的 diff
 func (s *GitCoreService) GetFileDiff(repoPath, filename string, staged bool) ([]models.FileDiff, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return nil, fmt.Errorf("path cannot be empty")
 	}
 
@@ -509,7 +513,7 @@ func (s *GitCoreService) GetFileDiff(repoPath, filename string, staged bool) ([]
 
 // GetLog 获取Git提交历史
 func (s *GitCoreService) GetLog(repoPath string, limit int) ([]models.GitCommit, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return nil, fmt.Errorf("path cannot be empty")
 	}
 
@@ -539,7 +543,7 @@ func (s *GitCoreService) GetLog(repoPath string, limit int) ([]models.GitCommit,
 
 // GetGraphHistory 获取图形化历史数据
 func (s *GitCoreService) GetGraphHistory(repoPath string, limit int) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
@@ -554,7 +558,7 @@ func (s *GitCoreService) GetGraphHistory(repoPath string, limit int) (string, er
 
 // StageAll 暂存所有变更
 func (s *GitCoreService) StageAll(repoPath string) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
@@ -568,7 +572,7 @@ func (s *GitCoreService) StageAll(repoPath string) (string, error) {
 
 // ResetFile 重置文件
 func (s *GitCoreService) ResetFile(repoPath, filename string) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
@@ -582,7 +586,7 @@ func (s *GitCoreService) ResetFile(repoPath, filename string) (string, error) {
 
 // GetMergeConflicts 获取合并冲突列表
 func (s *GitCoreService) GetMergeConflicts(repoPath string) ([]string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return nil, fmt.Errorf("path cannot be empty")
 	}
 
@@ -605,7 +609,7 @@ func (s *GitCoreService) GetMergeConflicts(repoPath string) ([]string, error) {
 
 // ResolveConflict 解决冲突
 func (s *GitCoreService) ResolveConflict(repoPath, filename, strategy string) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
@@ -629,7 +633,7 @@ func (s *GitCoreService) ResolveConflict(repoPath, filename, strategy string) (s
 
 // StashSave 保存 stash
 func (s *GitCoreService) StashSave(repoPath, message string) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
@@ -648,7 +652,7 @@ func (s *GitCoreService) StashSave(repoPath, message string) (string, error) {
 
 // StashApply 应用 stash
 func (s *GitCoreService) StashApply(repoPath, stashId string) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
@@ -662,7 +666,7 @@ func (s *GitCoreService) StashApply(repoPath, stashId string) (string, error) {
 
 // StashPop 弹出 stash
 func (s *GitCoreService) StashPop(repoPath, stashId string) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
@@ -676,7 +680,7 @@ func (s *GitCoreService) StashPop(repoPath, stashId string) (string, error) {
 
 // StashDrop 删除 stash
 func (s *GitCoreService) StashDrop(repoPath, stashId string) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
@@ -690,7 +694,7 @@ func (s *GitCoreService) StashDrop(repoPath, stashId string) (string, error) {
 
 // GetBlame 获取文件 blame 信息
 func (s *GitCoreService) GetBlame(repoPath, filename string) ([]models.GitBlameLine, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return nil, fmt.Errorf("path cannot be empty")
 	}
 
@@ -713,7 +717,7 @@ func (s *GitCoreService) GetBlame(repoPath, filename string) ([]models.GitBlameL
 
 // AmendCommit 修改最后一次提交
 func (s *GitCoreService) AmendCommit(repoPath, message string) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
@@ -727,7 +731,7 @@ func (s *GitCoreService) AmendCommit(repoPath, message string) (string, error) {
 
 // Checkout 切换分支
 func (s *GitCoreService) Checkout(repoPath, branch string) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
@@ -741,7 +745,7 @@ func (s *GitCoreService) Checkout(repoPath, branch string) (string, error) {
 
 // GetStatusStructured 获取 Git 状态（结构化返回）
 func (s *GitCoreService) GetStatusStructured(repoPath string) ([]models.GitFileStatus, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return nil, fmt.Errorf("path cannot be empty")
 	}
 
@@ -774,7 +778,7 @@ func (s *GitCoreService) GetStatusStructured(repoPath string) ([]models.GitFileS
 
 // GetRemoteInfo 获取远程仓库信息
 func (s *GitCoreService) GetRemoteInfo(repoPath string) ([]models.GitRemoteInfo, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return nil, fmt.Errorf("path cannot be empty")
 	}
 
@@ -808,7 +812,7 @@ func (s *GitCoreService) GetRemoteInfo(repoPath string) ([]models.GitRemoteInfo,
 
 // Rebase 变基操作
 func (s *GitCoreService) Rebase(repoPath, branch string) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
@@ -822,7 +826,7 @@ func (s *GitCoreService) Rebase(repoPath, branch string) (string, error) {
 
 // GetStashList 获取 stash 列表
 func (s *GitCoreService) GetStashList(repoPath string) ([]models.GitStash, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return nil, fmt.Errorf("path cannot be empty")
 	}
 
@@ -850,7 +854,7 @@ func (s *GitCoreService) GetStashList(repoPath string) ([]models.GitStash, error
 
 // GetGraphHistoryWithFormat 获取图形化历史数据
 func (s *GitCoreService) GetGraphHistoryWithFormat(repoPath string, limit int) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
@@ -865,7 +869,7 @@ func (s *GitCoreService) GetGraphHistoryWithFormat(repoPath string, limit int) (
 
 // ShowBranchTree 获取分支树结构
 func (s *GitCoreService) ShowBranchTree(repoPath string) (string, error) {
-	if repoPath == "" {
+	if strings.TrimSpace(repoPath) == "" {
 		return "", fmt.Errorf("path cannot be empty")
 	}
 
