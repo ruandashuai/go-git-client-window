@@ -19,6 +19,7 @@ func TestGetBranchLog(t *testing.T) {
 			fmt.Println(item)
 		}
 	}
+	assert.NotEmpty(t, logs)
 }
 
 func TestGetCurrentBranch(t *testing.T) {
@@ -26,4 +27,9 @@ func TestGetCurrentBranch(t *testing.T) {
 	assert.NoError(t, err)
 	logger.Info("当前分支", "branch", branch)
 	assert.True(t, branch != "")
+}
+
+func TestGetGraphHistory(t *testing.T) {
+	history, _ := gitService.GetGraphHistory(repoPath, 100)
+	fmt.Println(history)
 }
