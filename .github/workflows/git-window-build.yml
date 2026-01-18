@@ -1,26 +1,71 @@
-# This workflow will build a golang project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
-
-name: Go
+name: Build Client
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "main" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "master", "main" ]
 
 jobs:
-
   build:
-    runs-on: ubuntu-latest
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            platform: linux
+            goos: linux
+            goarch: amd64
+            binary_ext: ""
+          - os: windows-latest
+            platform: windows
+            goos: windows
+            goarch: amd64
+            binary_ext: ".exe"
+          - os: macos-latest
+            platform: darwin
+            goos: darwin
+            goarch: amd64
+            binary_ext: ""
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - name: 安装GO
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+          cache: true
 
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.25.5'
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.12.0"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
 
-    - name: Build
-      run:  wails build .
+      - name: 安装 Wails CLI
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      - name: 安装前端 dependencies 依赖
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Get Go dependencies
+        run: go mod download
+
+      - name: Configure Go environment
+        run: |
+          echo "GOOS=${{ matrix.goos }}" >> $GITHUB_ENV
+          echo "GOARCH=${{ matrix.goarch }}" >> $GITHUB_ENV
+
+      - name: Build for ${{ matrix.platform }}
+        run: wails build -clean -platform ${{ matrix.platform }}/amd64
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: go-git-client-${{ matrix.platform }}
+          path: build/bin/
+          retention-days: 30
 
