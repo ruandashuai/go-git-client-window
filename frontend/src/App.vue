@@ -46,84 +46,18 @@
     <!-- 主内容区域 - 三栏布局 -->
     <div class="main-content">
       <!-- 左侧边栏 - 导航面板（分支、标签等）-->
-      <aside class="sidebar left-sidebar">
-        <div class="panel-header">
-          <h2 class="panel-title">
-            <span class="branch-icon">🌱</span>
-            导航
-          </h2>
-        </div>
-        <div class="panel-content">
-          <!-- 分支搜索 -->
-          <div class="search-box">
-            <input
-                type="text"
-                v-model="branchFilter"
-                placeholder="搜索分支..."
-                class="search-input"
-            />
-            <span class="search-icon">🔍</span>
-          </div>
-
-          <!-- 分支管理折叠列表 -->
-          <div class="collapsible-section">
-            <div class="section-header" @click="toggleSection('localBranches')">
-              <h3 class="section-title">
-                <span :class="['collapse-toggle', { 'expanded': expandedSections.localBranches }]">▼</span>
-                本地分支
-              </h3>
-              <span class="item-count">({{ localBranches.length }})</span>
-            </div>
-            <div v-show="expandedSections.localBranches" class="section-content">
-              <div 
-                v-for="branch in filteredLocalBranches"
-                :key="'local-' + branch.name"
-                :class="['branch-item', { 'active': branch.current }]"
-                @click="selectBranch(branch.name)"
-              >
-                <span class="branch-type">🌿</span>
-                <span class="branch-name">{{ branch.name }}</span>
-                <span v-if="branch.current" class="current-indicator">●</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="collapsible-section">
-            <div class="section-header" @click="toggleSection('remoteBranches')">
-              <h3 class="section-title">
-                <span :class="['collapse-toggle', { 'expanded': expandedSections.remoteBranches }]">▼</span>
-                远程分支
-              </h3>
-              <span class="item-count">({{ filteredRemoteBranches?.length || 0 }})</span>
-            </div>
-            <div v-show="expandedSections.remoteBranches" class="section-content">
-              <div 
-                v-for="branch in filteredRemoteBranches"
-                :key="'remote-' + branch.name"
-                :class="['branch-item']"
-                @click="selectRemoteBranch(branch.name)"
-              >
-                <span class="branch-type">📡</span>
-                <span class="branch-name">{{ branch.name }}</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="collapsible-section">
-            <div class="section-header" @click="toggleSection('tags')">
-              <h3 class="section-title">
-                <span :class="['collapse-toggle', { 'expanded': expandedSections.tags }]">▼</span>
-                标签
-              </h3>
-              <span class="item-count">(0)</span>
-            </div>
-            <div v-show="expandedSections.tags" class="section-content">
-              <div class="placeholder-item">暂无标签</div>
-            </div>
-          </div>
-        </div>
-      </aside>
-
+      <BranchList 
+        :all-branches="allBranches"
+        :branch-filter="branchFilter"
+        @switch-branch="switchBranch"
+        @create-branch="createBranch"
+        @delete-branch="deleteBranch"
+        @refresh-branches="loadBranches"
+        @show-branch-history="showBranchHistory"
+        @open-branch-context-menu="openBranchContextMenu"
+        @update:branch-filter="branchFilter = $event"
+      />
+      
       <!-- 中间主内容区 - 提交历史图表 -->
       <main class="main-content-area">
         <div class="panel-header">
@@ -315,6 +249,7 @@
 
 <script>
 import {computed, onMounted, reactive, ref, onUpdated} from 'vue'
+import BranchList from './components/BranchList.vue'
 
 // 导入Wails运行时和Go模块
 // 注意：在生产环境中，Wails会在运行时注入这些对象，所以不需要显式导入
@@ -322,6 +257,9 @@ import {computed, onMounted, reactive, ref, onUpdated} from 'vue'
 
 export default {
   name: 'App',
+  components: {
+    BranchList
+  },
   setup() {
     // State variables
     const repoPath = ref('D:/workspace/go-git-client-window')
