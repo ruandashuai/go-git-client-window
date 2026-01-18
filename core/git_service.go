@@ -22,7 +22,6 @@ func NewGitCoreService() *GitCoreService {
 
 // ExecuteGitCommand 执行 Git 命令
 func ExecuteGitCommand(dir string, args ...string) (string, error) {
-	//在这里判断dir不能是nil或者空字符串
 	if strings.TrimSpace(dir) == "" {
 		return "", fmt.Errorf("dir cannot be empty")
 	}
@@ -31,7 +30,7 @@ func ExecuteGitCommand(dir string, args ...string) (string, error) {
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return "", fmt.Errorf("git command failed: %s, output: %s", err.Error(), string(output))
+		return "", fmt.Errorf("%v, %v", err.Error(), string(output))
 	}
 
 	return string(output), nil
@@ -266,8 +265,21 @@ func (s *GitCoreService) CheckoutBranch(repoPath, branchName string) (string, er
 }
 
 // CreateBranch 创建分支
+
 func (s *GitCoreService) CreateBranch(repoPath, branchName string) (string, error) {
+	// 默认基于当前检出的分支创建新分支
 	output, err := ExecuteGitCommand(repoPath, "checkout", "-b", branchName)
+	if err != nil {
+		return "", err
+	}
+
+	return output, nil
+}
+
+// CreateBranchFrom 创建基于指定源分支的新分支
+func (s *GitCoreService) CreateBranchFrom(repoPath, newBranchName, sourceBranch string) (string, error) {
+
+	output, err := ExecuteGitCommand(repoPath, "checkout", "-b", newBranchName, sourceBranch)
 	if err != nil {
 		return "", err
 	}
@@ -434,10 +446,6 @@ func (s *GitCoreService) Add(repoPath, files string) (string, error) {
 
 // Commit 提交更改
 func (s *GitCoreService) Commit(repoPath, message string) (string, error) {
-	if strings.TrimSpace(repoPath) == "" {
-		return "", fmt.Errorf("path cannot be empty")
-	}
-
 	output, err := ExecuteGitCommand(repoPath, "commit", "-m", message)
 	if err != nil {
 		return "", err

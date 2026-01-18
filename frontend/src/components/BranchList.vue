@@ -35,36 +35,17 @@
         </div>
         <div class="branch-list">
           <div v-for="branch in localBranches"
-              :key="'local-' + branch.name"
-              :class="[
+               :key="'local-' + branch.name"
+               :class="[
               'branch-item',
               { 'active': branch.current, 'current': branch.current }
             ]"
-              @dblclick="$emit('show-branch-history', branch.name)"
-              @contextmenu.prevent="$emit('open-branch-context-menu', $event, branch, 'local')"
+               @dblclick="$emit('show-branch-history', branch.name)"
+               @contextmenu.prevent="$emit('open-branch-context-menu', $event, branch, 'local')"
           >
             <div class="branch-info">
-              <span class="branch-type">🌿</span>
               <span class="branch-name" :title="branch.name">{{ branch.name }}</span>
-              <span v-if="branch.current" class="branch-current-badge" title="当前分支">●</span>
-            </div>
-            <div class="branch-actions">
-              <button
-                  v-if="!branch.current"
-                  @click.stop="$emit('switch-branch', branch.name)"
-                  class="action-btn switch-btn"
-                  title="切换到此分支"
-              >
-                ↔️
-              </button>
-              <button
-                  v-if="!branch.current"
-                  @click.stop="$emit('delete-branch', branch.name)"
-                  class="action-btn delete-btn"
-                  title="删除分支"
-              >
-                ❌
-              </button>
+              <span v-if="branch.current" class="branch-current-badge" >（当前分支）</span>
             </div>
           </div>
           <div v-if="filteredLocalBranches?.length === 0 && branchFilter === ''" class="no-branches">
@@ -80,11 +61,11 @@
       <div class="branch-section">
         <div class="section-header">
           <h3 class="section-title">远程分支</h3>
-          <span class="item-count">({{ (filteredRemoteBranches?.value?.length || 0) }})</span>
+          <span class="item-count">({{ (remoteBranches?.value?.length || 0) }})</span>
         </div>
         <div class="branch-list">
           <div
-              v-for="branch in filteredRemoteBranches"
+              v-for="branch in remoteBranches"
               :key="'remote-' + branch.name"
               :class="['branch-item', { 'active': branch.current }]"
               @dblclick="$emit('show-branch-history', branch.name.replace('origin/', ''))"
@@ -117,7 +98,7 @@
 </template>
 
 <script>
-import { computed } from 'vue'
+import {computed} from 'vue'
 
 export default {
   name: 'BranchList',
@@ -145,47 +126,33 @@ export default {
       if (!props.allBranches || !Array.isArray(props.allBranches)) {
         return []
       }
-      return props.allBranches.filter(branch => !branch.remote)
+      let resultList = props.allBranches.filter(branch => !branch.remote);
+      if (props.branchFilter && props.branchFilter.trim() !== '') {
+        let searchLower = props.branchFilter.toLowerCase().trim();
+        resultList = resultList.filter(branch =>
+            branch.name.toLowerCase().includes(searchLower)
+        )
+      }
+      return resultList
     })
 
     const remoteBranches = computed(() => {
       if (!props.allBranches || !Array.isArray(props.allBranches)) {
         return []
       }
-      return props.allBranches.filter(branch => branch.remote)
-    })
-
-    // 计算属性：过滤后的本地分支
-    const filteredLocalBranches = computed(() => {
-      if (!localBranches.value || !Array.isArray(localBranches.value)) {
-        return []
+      let resultList = props.allBranches.filter(branch => branch.remote);
+      if (props.branchFilter && props.branchFilter.trim() !== '') {
+        let searchLower = props.branchFilter.toLowerCase().trim();
+        resultList = resultList.filter(branch =>
+            branch.name.toLowerCase().includes(searchLower)
+        )
       }
-      if (!props.branchFilter) {
-        return localBranches.value
-      }
-      return localBranches.value.filter(branch =>
-          branch.name.toLowerCase().includes(props.branchFilter.toLowerCase())
-      )
-    })
-
-    // 计算属性：过滤后的远程分支
-    const filteredRemoteBranches = computed(() => {
-      if (!remoteBranches.value || !Array.isArray(remoteBranches.value)) {
-        return []
-      }
-      if (!props.branchFilter) {
-        return remoteBranches.value
-      }
-      return remoteBranches.value.filter(branch =>
-          branch.name.toLowerCase().includes(props.branchFilter.toLowerCase())
-      )
+      return resultList
     })
 
     return {
       localBranches,
-      remoteBranches,
-      filteredLocalBranches,
-      filteredRemoteBranches
+      remoteBranches
     }
   }
 }
