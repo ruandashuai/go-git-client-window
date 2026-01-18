@@ -3,12 +3,12 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  background-color: #2b2b2b;
-  color: #a9b7c6;
+  background-color: #1e1e1e;
+  color: #cccccc;
   height: 100vh;
   overflow: hidden;
 }
@@ -17,22 +17,25 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  background-color: #1e1e1e;
 }
 
-/* 顶部导航栏样式 */
+/* 顶部导航栏样式 - 高度压缩 */
 .top-nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  background-color: #3c3f41;
-  border-bottom: 1px solid #4e5254;
+  padding: 8px 16px;
+  background-color: #252526;
+  border-bottom: 1px solid #3c3c3c;
+  min-height: 40px;
 }
 
 .nav-left {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex: 1;
 }
 
 .app-title {
@@ -40,60 +43,43 @@ body {
   align-items: center;
   gap: 8px;
   margin: 0;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  color: #a9b7c6;
+  color: #cccccc;
 }
 
-.git-icon {
-  font-size: 20px;
-}
-
-.nav-center {
+.repo-info {
   display: flex;
   align-items: center;
-  gap: 12px;
-}
-
-.repo-input-container {
-  display: flex;
-  align-items: center;
-  background-color: #3c3f41;
-  border: 1px solid #5e6366;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.repo-path-input {
-  padding: 8px 12px;
-  background-color: #3c3f41;
-  border: none;
-  color: #a9b7c6;
-  font-size: 13px;
-  width: 300px;
-}
-
-.repo-path-input:focus {
-  outline: none;
-}
-
-.browse-btn {
-  padding: 8px 12px;
-  background-color: #4a6d8c;
-  border: none;
-  color: #ffffff;
-  cursor: pointer;
-  font-size: 13px;
-  transition: background-color 0.2s;
-}
-
-.browse-btn:hover {
-  background-color: #5c7d9e;
-}
-
-.repo-actions {
-  display: flex;
   gap: 8px;
+}
+
+.repo-path {
+  font-size: 12px;
+  color: #999999;
+  background-color: #2d2d30;
+  padding: 4px 8px;
+  border-radius: 4px;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.branch-selector {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.branch-dropdown {
+  background-color: #2d2d30;
+  border: 1px solid #3c3c3c;
+  color: #cccccc;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  min-width: 120px;
 }
 
 .nav-right {
@@ -102,88 +88,104 @@ body {
   gap: 12px;
 }
 
-.connection-status {
+.nav-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.action-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: #a9b7c6;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid #3c3c3c;
+  background-color: #2d2d30;
+  color: #cccccc;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
 }
 
-.status-indicator {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
+.action-btn:hover {
+  background-color: #3c3c3c;
+  border-color: #4a6d8c;
+}
+
+.fetch-btn {
+  background-color: #2d2d30;
+  border: 1px solid #3c3c3c;
+}
+
+.pull-btn {
+  background-color: #2d2d30;
+  border: 1px solid #3c3c3c;
+}
+
+.push-btn {
+  background-color: #2d2d30;
+  border: 1px solid #3c3c3c;
+}
+
+.badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: #ff4444;
+  color: white;
   border-radius: 50%;
-  margin-right: 6px;
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
 }
 
-.status-indicator.connected {
-  background-color: #6a8759;
-}
-
-.status-indicator.disconnected {
-  background-color: #cc7832;
-}
-
-/* 主内容区域 */
+/* 主内容区域 - 三栏布局 */
 .main-content {
   display: flex;
   flex: 1;
   overflow: hidden;
-  gap: 16px;
-  padding: 16px;
+  gap: 1px;
+  background-color: #3c3c3c;
 }
 
 .sidebar {
-  width: 320px;
-  background-color: #313335;
-  border-radius: 6px;
-  overflow: hidden;
+  background-color: #252526;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  width: 250px;
 }
 
 .left-sidebar {
-  border: 1px solid #4e5254;
+  border-right: 1px solid #3c3c3c;
 }
 
 .right-sidebar {
-  border: 1px solid #4e5254;
+  border-left: 1px solid #3c3c3c;
+  width: 300px;
 }
 
-.main-area {
+.main-content-area {
   flex: 1;
+  background-color: #1e1e1e;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  overflow-y: auto;
-}
-
-.file-status-panel {
-  flex: 1;
-}
-
-.commit-panel {
-  margin-bottom: 0;
+  overflow: hidden;
 }
 
 /* 面板通用样式 */
-.panel {
-  background-color: #313335;
-  border-radius: 6px;
-  overflow: hidden;
-  margin-bottom: 16px;
-  border: 1px solid #4e5254;
-}
-
 .panel-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  background-color: #3c3f41;
-  border-bottom: 1px solid #4e5254;
+  padding: 10px 12px;
+  background-color: #2d2d30;
+  border-bottom: 1px solid #3c3c3c;
 }
 
 .panel-title {
@@ -193,56 +195,30 @@ body {
   margin: 0;
   font-size: 14px;
   font-weight: 600;
-  color: #a9b7c6;
-}
-
-.panel-actions {
-  display: flex;
-  gap: 6px;
-}
-
-.icon-btn {
-  background-color: transparent;
-  border: 1px solid #5e6366;
-  color: #a9b7c6;
-  width: 28px;
-  height: 28px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-}
-
-.icon-btn:hover {
-  background-color: #4e5254;
-  border-color: #4a6d8c;
-  color: #4a6d8c;
+  color: #cccccc;
 }
 
 .panel-content {
-  padding: 12px;
-  max-height: 400px;
+  flex: 1;
+  padding: 8px;
   overflow-y: auto;
+  background-color: #1e1e1e;
 }
 
 /* 搜索框样式 */
 .search-box {
   position: relative;
-  margin-bottom: 12px;
-  padding: 0 8px;
+  margin: 8px;
 }
 
 .search-input {
   width: 100%;
-  padding: 8px 30px 8px 12px;
-  background-color: #3c3f41;
-  border: 1px solid #5e6366;
+  padding: 6px 30px 6px 10px;
+  background-color: #2d2d30;
+  border: 1px solid #3c3c3c;
   border-radius: 4px;
-  color: #a9b7c6;
-  font-size: 13px;
+  color: #cccccc;
+  font-size: 12px;
 }
 
 .search-input:focus {
@@ -258,64 +234,83 @@ body {
   color: #808080;
 }
 
-/* 分支项样式 */
-.branch-section {
-  margin-bottom: 20px;
+/* 折叠面板样式 */
+.collapsible-section {
+  margin-bottom: 8px;
 }
 
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 8px 8px 8px;
-  border-bottom: 1px solid #4e5254;
-  margin-bottom: 8px;
+  padding: 6px 8px;
+  cursor: pointer;
+  background-color: #2d2d30;
+  border-radius: 4px;
+  margin: 0 4px;
+}
+
+.section-header:hover {
+  background-color: #3c3c3c;
 }
 
 .section-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 13px;
   font-weight: 600;
-  color: #6a8759;
+  color: #cccccc;
   margin: 0;
 }
 
+.collapse-toggle {
+  font-size: 10px;
+  transition: transform 0.2s;
+  color: #808080;
+}
+
+.collapse-toggle.expanded {
+  transform: rotate(90deg);
+}
+
 .item-count {
-  background-color: #4e5254;
-  color: #a9b7c6;
-  padding: 2px 6px;
+  background-color: #3c3c3c;
+  color: #cccccc;
+  padding: 1px 5px;
   border-radius: 10px;
-  font-size: 11px;
+  font-size: 10px;
 }
 
-.branch-list {
-  padding: 0 4px;
+.section-content {
+  padding: 4px 0;
 }
 
+.placeholder-item {
+  padding: 6px 12px;
+  font-size: 12px;
+  color: #808080;
+  text-align: center;
+}
+
+/* 分支项样式 */
 .branch-item {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 6px 8px;
-  margin-bottom: 2px;
+  padding: 6px 12px;
+  margin: 0 4px 2px;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 12px;
   transition: background-color 0.2s;
 }
 
 .branch-item:hover {
-  background-color: #4e5254;
+  background-color: #3c3c3c;
 }
 
 .branch-item.active {
-  background-color: #4a6d8c;
-}
-
-.branch-info {
-  display: flex;
-  align-items: center;
-  flex: 1;
-  min-width: 0;
+  background-color: #094771;
 }
 
 .branch-type {
@@ -330,75 +325,186 @@ body {
   text-overflow: ellipsis;
 }
 
-.branch-current-badge {
-  background-color: #6a8759;
-  color: #ffffff;
-  padding: 1px 5px;
-  border-radius: 3px;
-  font-size: 10px;
+.current-indicator {
+  color: #6a8759;
   margin-left: 6px;
 }
 
-.branch-actions {
+/* 提交历史图表样式 */
+.commit-graph-container {
   display: flex;
+  flex-direction: column;
   gap: 4px;
+}
+
+.commit-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 8px;
+  border: 1px solid #3c3c3c;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: #252526;
+  margin-bottom: 4px;
+}
+
+.commit-item:hover {
+  border-color: #4a6d8c;
+  background-color: #2a2d2f;
+}
+
+.commit-item.selected {
+  border-color: #094771;
+  background-color: #2a2d2f;
+  box-shadow: 0 0 0 1px #094771;
+}
+
+.commit-graph {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 8px;
+  margin-top: 2px;
+}
+
+.commit-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.commit-line {
+  height: 20px;
+  width: 2px;
+  border-left: 2px solid;
+  margin-top: 2px;
+}
+
+.commit-details {
+  flex: 1;
+}
+
+.commit-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 4px;
+}
+
+.commit-message {
+  flex: 1;
+  font-weight: 500;
+  color: #d4d4d4;
+  word-break: break-word;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.commit-hash {
+  font-family: monospace;
+  font-size: 11px;
+  color: #9876aa;
+  background-color: #2d2d30;
+  padding: 2px 6px;
+  border-radius: 3px;
+  min-width: 50px;
+  text-align: center;
   margin-left: 8px;
 }
 
-.action-btn {
-  background: none;
-  border: 1px solid #5e6366;
-  color: #a9b7c6;
-  width: 22px;
-  height: 22px;
-  border-radius: 3px;
-  cursor: pointer;
-  font-size: 12px;
+.commit-meta {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #808080;
+  margin-top: 2px;
 }
 
-.action-btn:hover {
-  background-color: #4e5254;
-}
-
-.switch-btn:hover {
-  border-color: #4a6d8c;
-  color: #4a6d8c;
-}
-
-.delete-btn:hover {
-  border-color: #cc7832;
+.commit-author {
   color: #cc7832;
 }
 
-/* 文件状态样式 */
-.status-content {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+.commit-date {
+  color: #808080;
 }
 
-.status-section {
+/* 提交详情视图 */
+.detail-header {
+  margin-bottom: 12px;
+}
+
+.detail-hash {
+  font-family: monospace;
+  font-size: 12px;
+  color: #9876aa;
+  background-color: #2d2d30;
+  padding: 4px 8px;
+  border-radius: 3px;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
+.detail-message {
+  font-size: 14px;
+  font-weight: 500;
+  color: #d4d4d4;
+  margin-bottom: 8px;
+}
+
+.detail-meta {
+  margin-bottom: 12px;
+  padding: 8px 0;
+  border-top: 1px solid #3c3c3c;
+  border-bottom: 1px solid #3c3c3c;
+}
+
+.detail-author, .detail-date {
+  font-size: 12px;
+  color: #cccccc;
+  margin-bottom: 4px;
+}
+
+.diff-preview {
+  margin-top: 12px;
+}
+
+.diff-preview h4 {
+  font-size: 12px;
+  color: #cccccc;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #3c3c3c;
+  padding-bottom: 4px;
+}
+
+.diff-placeholder {
+  font-size: 12px;
+  color: #808080;
+  padding: 8px;
+  background-color: #252526;
+  border-radius: 4px;
+}
+
+/* 暂存视图 */
+.file-changes-section {
   margin-bottom: 16px;
 }
 
-.status-section-title {
+.section-subtitle {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
+  gap: 6px;
+  font-size: 12px;
   font-weight: 600;
-  color: #a9b7c6;
-  margin: 0 0 8px 0;
+  color: #cccccc;
+  margin: 0 0 6px 0;
   padding-bottom: 4px;
-  border-bottom: 1px solid #4e5254;
+  border-bottom: 1px solid #3c3c3c;
 }
 
 .file-change-icon {
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .file-change-icon.modified {
@@ -412,26 +518,31 @@ body {
 .file-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .file-item {
   display: flex;
   align-items: center;
   padding: 6px 8px;
-  border-radius: 4px;
-  background-color: #3c3f41;
+  border-radius: 3px;
+  background-color: #252526;
   transition: background-color 0.2s;
 }
 
 .file-item:hover {
-  background-color: #4e5254;
+  background-color: #2a2d2f;
+}
+
+.file-checkbox {
+  margin-right: 6px;
 }
 
 .file-status {
   width: 20px;
   text-align: center;
   font-weight: bold;
+  font-size: 11px;
   margin-right: 6px;
 }
 
@@ -459,202 +570,122 @@ body {
 }
 
 .small-btn {
-  padding: 4px 8px;
+  padding: 3px 6px;
   border-radius: 3px;
   border: none;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 10px;
   transition: background-color 0.2s;
 }
 
 .small-btn.primary {
-  background-color: #4a6d8c;
+  background-color: #094771;
   color: white;
 }
 
 .small-btn.primary:hover {
-  background-color: #5c7d9e;
+  background-color: #0b5a8a;
 }
 
 .small-btn.secondary {
-  background-color: #4e5254;
-  color: #a9b7c6;
+  background-color: #3c3c3c;
+  color: #cccccc;
 }
 
 .small-btn.secondary:hover {
-  background-color: #5e6366;
+  background-color: #4a4a4a;
 }
 
 .small-btn.danger {
-  background-color: #cc7832;
+  background-color: #be4242;
   color: white;
 }
 
 .small-btn.danger:hover {
-  background-color: #da8b45;
+  background-color: #ce5959;
 }
 
-.commit-btn {
-  background-color: #6a8759;
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: background-color 0.2s;
+.commit-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #3c3c3c;
 }
 
-.commit-btn:disabled {
-  background-color: #4e5254;
-  cursor: not-allowed;
+.commit-input-group {
+  margin-bottom: 8px;
 }
 
-.commit-btn:not(:disabled):hover {
-  background-color: #7baa6d;
-}
-
-/* 提交表单样式 */
-.commit-form {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.commit-message-input {
+.commit-summary-input {
   width: 100%;
-  padding: 10px;
-  background-color: #3c3f41;
-  border: 1px solid #5e6366;
+  padding: 6px 8px;
+  background-color: #252526;
+  border: 1px solid #3c3c3c;
   border-radius: 4px;
-  color: #a9b7c6;
-  font-size: 13px;
-  font-family: inherit;
-  resize: vertical;
-  min-height: 80px;
+  color: #cccccc;
+  font-size: 12px;
 }
 
-.commit-message-input:focus {
+.commit-summary-input:focus {
   outline: none;
   border-color: #4a6d8c;
 }
 
-.commit-actions {
-  display: flex;
-  justify-content: flex-end;
-}
-
-/* 提交历史样式 */
-.commits-container {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.commit-item {
-  padding: 12px;
-  border: 1px solid #4e5254;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
-  background-color: #3c3f41;
-}
-
-.commit-item:hover {
-  border-color: #4a6d8c;
-  background-color: #474a4d;
-}
-
-.commit-item.selected {
-  border-color: #6a8759;
-  background-color: #424547;
-  box-shadow: 0 0 0 2px rgba(106, 135, 89, 0.3);
-}
-
-.commit-overview {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.commit-main {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-}
-
-.commit-hash {
-  font-family: monospace;
+.commit-description-input {
+  width: 100%;
+  padding: 6px 8px;
+  background-color: #252526;
+  border: 1px solid #3c3c3c;
+  border-radius: 4px;
+  color: #cccccc;
   font-size: 12px;
-  color: #9876aa;
-  background-color: #2b2b2b;
-  padding: 2px 6px;
-  border-radius: 3px;
-  min-width: 60px;
+  resize: vertical;
+  min-height: 60px;
+  margin-bottom: 8px;
+}
+
+.commit-description-input:focus {
+  outline: none;
+  border-color: #4a6d8c;
+}
+
+.commit-action-btn {
+  width: 100%;
+  padding: 8px;
+  background-color: #6a8759;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background-color 0.2s;
+}
+
+.commit-action-btn:disabled {
+  background-color: #3c3c3c;
+  cursor: not-allowed;
+}
+
+.commit-action-btn:not(:disabled):hover {
+  background-color: #7baa6d;
+}
+
+.empty-staging-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  color: #808080;
   text-align: center;
 }
 
-.commit-message {
-  flex: 1;
-  font-weight: 500;
-  color: #a9b7c6;
-  word-break: break-word;
-}
-
-.commit-meta {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  font-size: 12px;
-  color: #808080;
-  margin-top: 4px;
-}
-
-.commit-author {
-  color: #cc7832;
-}
-
-.commit-date {
-  color: #808080;
-}
-
-.commit-refs {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-top: 6px;
-}
-
-.commit-ref {
-  background-color: #4a6d8c;
-  color: #ffffff;
-  padding: 2px 6px;
-  border-radius: 10px;
-  font-size: 11px;
-}
-
-.commit-graph {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.commit-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.commit-line {
-  height: 20px;
-  width: 2px;
-  border-left: 2px solid;
-  margin-left: 5px;
+.empty-staging-view .empty-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
 }
 
 /* 加载状态 */
@@ -671,7 +702,7 @@ body {
 .spinner {
   width: 24px;
   height: 24px;
-  border: 2px solid #4e5254;
+  border: 2px solid #3c3c3c;
   border-top: 2px solid #4a6d8c;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -698,93 +729,94 @@ body {
   margin-bottom: 10px;
 }
 
-/* 按钮样式 */
-.btn-icon {
-  margin-right: 6px;
-}
-
-.primary-btn {
-  background-color: #4a6d8c;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 13px;
+/* 状态栏 */
+.status-bar {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  transition: background-color 0.2s;
-}
-
-.primary-btn:hover {
-  background-color: #5c7d9e;
-}
-
-.secondary-btn {
-  background-color: #3c3f41;
-  color: #a9b7c6;
-  border: 1px solid #5e6366;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  transition: all 0.2s;
-}
-
-.secondary-btn:hover {
-  background-color: #4e5254;
-  border-color: #4a6d8c;
-}
-
-/* 动画效果 */
-.slide-fade-enter-active {
-  transition: all 0.3s ease;
-}
-
-.slide-fade-leave-active {
-  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
-}
-
-.slide-fade-enter-from, .slide-fade-leave-to {
-  transform: translateX(20px);
-  opacity: 0;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 6px;
-}
-
-.action-buttons button {
-  background-color: #4a6d8c;
-  border: none;
-  color: #ffffff;
-  padding: 4px 10px;
-  border-radius: 3px;
-  cursor: pointer;
+  padding: 6px 12px;
+  background-color: #252526;
+  border-top: 1px solid #3c3c3c;
   font-size: 11px;
 }
 
-.action-buttons button:hover {
-  background-color: #5c7d9e;
+.status-left, .status-center, .status-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.refresh-btn {
-  background-color: transparent;
-  border: 1px solid #5e6366;
-  color: #a9b7c6;
-  padding: 4px 8px;
-  border-radius: 3px;
+.current-branch {
+  color: #6a8759;
+}
+
+.repo-path {
+  color: #cccccc;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.change-summary {
+  display: flex;
+  gap: 12px;
+}
+
+.working-changes {
+  color: #cc7832;
+}
+
+.staged-changes {
+  color: #6a8759;
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.status-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-indicator.connected {
+  background-color: #6a8759;
+}
+
+.status-indicator.disconnected {
+  background-color: #cc7832;
+}
+
+/* 右键菜单样式 */
+.context-menu {
+  position: fixed;
+  background-color: #3c3f41;
+  border: 1px solid #4e5254;
+  border-radius: 4px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  min-width: 120px;
+  z-index: 1000;
+  padding: 4px 0;
+}
+
+.context-menu-item {
+  padding: 8px 12px;
   cursor: pointer;
+  color: #a9b7c6;
   font-size: 12px;
+  transition: background-color 0.2s;
 }
 
-.refresh-btn:hover {
+.context-menu-item:hover {
   background-color: #4e5254;
 }
 
+/* 通知样式 */
 .notification {
   position: fixed;
   top: 20px;
@@ -816,81 +848,16 @@ body {
   background-color: #4a6d8c;
 }
 
-/* 状态栏 */
-.status-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 16px;
-  background-color: #3c3f41;
-  border-top: 1px solid #4e5254;
-  font-size: 12px;
+/* 动画效果 */
+.slide-fade-enter-active {
+  transition: all 0.3s ease;
 }
 
-.status-left, .status-center, .status-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.slide-fade-leave-active {
+  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
 }
 
-.current-branch {
-  color: #6a8759;
-}
-
-.repo-path {
-  color: #a9b7c6;
-  max-width: 400px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.change-summary {
-  display: flex;
-  gap: 12px;
-}
-
-.working-changes {
-  color: #cc7832;
-}
-
-.staged-changes {
-  color: #6a8759;
-}
-
-/* 空分支状态 */
-.empty-branches {
-  padding: 12px;
-  text-align: center;
-  color: #808080;
-  font-style: italic;
-}
-
-.empty-message {
-  color: #808080;
-  font-size: 12px;
-}
-
-/* 右键菜单样式 */
-.context-menu {
-  position: fixed;
-  background-color: #3c3f41;
-  border: 1px solid #4e5254;
-  border-radius: 4px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  min-width: 120px;
-  z-index: 1000;
-  padding: 4px 0;
-}
-
-.context-menu-item {
-  padding: 8px 12px;
-  cursor: pointer;
-  color: #a9b7c6;
-  font-size: 12px;
-  transition: background-color 0.2s;
-}
-
-.context-menu-item:hover {
-  background-color: #4e5254;
+.slide-fade-enter-from, .slide-fade-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
 }

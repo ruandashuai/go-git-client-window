@@ -1,77 +1,58 @@
 <template>
   <div class="app-container">
-    <!-- 顶部导航栏 -->
+    <!-- 顶部导航栏 - 高度压缩，显示仓库路径、分支和操作按钮 -->
     <header class="top-nav">
       <div class="nav-left">
         <h1 class="app-title">
           <span class="git-icon">📊</span>
           Git 客户端
         </h1>
-      </div>
-      <div class="nav-center">
-        <div class="repo-input-container">
-          <input
-              type="text"
-              v-model="repoPath"
-              placeholder="输入 Git 仓库路径"
-              @keyup.enter="loadRepo"
-              class="repo-path-input"
-          />
-          <button @click="browseRepo" class="browse-btn" title="浏览目录">
-            📁
-          </button>
-        </div>
-        <div class="repo-actions">
-          <button @click="loadRepo" class="primary-btn">
-            <span class="btn-icon">📂</span>
-            加载仓库
-          </button>
-          <button @click="refreshData" class="secondary-btn">
-            <span class="btn-icon">🔄</span>
-            刷新
-          </button>
-          <button @click="pullChanges" class="secondary-btn">
-            <span class="btn-icon">⬇️</span>
-            拉取
-          </button>
-          <button @click="pushChanges" class="secondary-btn">
-            <span class="btn-icon">⬆️</span>
-            推送
-          </button>
+        <div class="repo-info">
+          <div class="repo-path">{{ repoPath || '未选择仓库' }}</div>
+          <div class="branch-selector">
+            <select v-model="currentBranch" @change="switchBranch(currentBranch)" class="branch-dropdown">
+              <option value="" disabled>选择分支...</option>
+              <option 
+                v-for="branch in allBranches" 
+                :key="branch.name" 
+                :value="branch.name"
+                :selected="branch.current"
+              >
+                {{ branch.name }} {{ branch.current ? '(当前)' : '' }}
+              </option>
+            </select>
+          </div>
         </div>
       </div>
       <div class="nav-right">
-        <div class="connection-status">
-          <span
-              :class="['status-indicator', {
-              'connected': repoPath,
-              'disconnected': !repoPath
-            }]"
-          ></span>
-          <span class="status-text">{{ repoPath ? '已连接' : '未连接' }}</span>
+        <div class="nav-actions">
+          <button @click="$emit('fetch-changes')" class="action-btn fetch-btn" title="获取最新更改">
+            <span class="btn-icon">📥</span>
+            Fetch
+          </button>
+          <button @click="$emit('pull-changes')" class="action-btn pull-btn" title="拉取更改">
+            <span class="btn-icon">⬇️</span>
+            Pull
+            <span v-if="pullCount > 0" class="badge">{{ pullCount }}</span>
+          </button>
+          <button @click="$emit('push-changes')" class="action-btn push-btn" title="推送更改">
+            <span class="btn-icon">⬆️</span>
+            Push
+          </button>
         </div>
       </div>
     </header>
 
-    <!-- 主内容区域 -->
+    <!-- 主内容区域 - 三栏布局 -->
     <div class="main-content">
-      <!-- 左侧边栏 - 分支管理 -->
+      <!-- 左侧边栏 - 导航面板（分支、标签等）-->
       <aside class="sidebar left-sidebar">
         <div class="panel-header">
           <h2 class="panel-title">
             <span class="branch-icon">🌱</span>
-            分支管理
+            导航
           </h2>
-          <div class="panel-actions">
-            <button @click="createBranch" class="icon-btn" title="创建分支">
-              ➕
-            </button>
-            <button @click="refreshBranches" class="icon-btn" title="刷新">
-              🔄
-            </button>
-          </div>
         </div>
-
         <div class="panel-content">
           <!-- 分支搜索 -->
           <div class="search-box">
@@ -84,273 +65,217 @@
             <span class="search-icon">🔍</span>
           </div>
 
-          <div class="branch-section">
-            <div class="section-header">
-              <h3 class="section-title">本地分支</h3>
-              <span class="item-count">({{ (localBranches.length || 0) }})</span>
+          <!-- 分支管理折叠列表 -->
+          <div class="collapsible-section">
+            <div class="section-header" @click="toggleSection('localBranches')">
+              <h3 class="section-title">
+                <span :class="['collapse-toggle', { 'expanded': expandedSections.localBranches }]">▼</span>
+                本地分支
+              </h3>
+              <span class="item-count">({{ localBranches.length }})</span>
             </div>
-            <div class="branch-list">
-              <div v-for="branch in localBranches"
-                  :key="'local-' + branch.name"
-                  :class="[
-                  'branch-item',
-                  { 'active': branch.current, 'current': branch.current }
-                ]"
-                  @dblclick="showBranchHistory(branch.name)"
-                  @contextmenu.prevent="openBranchContextMenu($event, branch, 'local')"
+            <div v-show="expandedSections.localBranches" class="section-content">
+              <div 
+                v-for="branch in filteredLocalBranches"
+                :key="'local-' + branch.name"
+                :class="['branch-item', { 'active': branch.current }]"
+                @click="selectBranch(branch.name)"
               >
-                <div class="branch-info">
-                  <span class="branch-type">🌿</span>
-                  <span class="branch-name" :title="branch.name">{{ branch.name }}</span>
-                  <span v-if="branch.current" class="branch-current-badge" title="当前分支">●</span>
-                </div>
-                <div class="branch-actions">
-                  <button
-                      v-if="!branch.current"
-                      @click.stop="switchBranch(branch.name)"
-                      class="action-btn switch-btn"
-                      title="切换到此分支"
-                  >
-                    ↔️
-                  </button>
-                  <button
-                      v-if="!branch.current"
-                      @click.stop="deleteBranch(branch.name)"
-                      class="action-btn delete-btn"
-                      title="删除分支"
-                  >
-                    ❌
-                  </button>
-                </div>
+                <span class="branch-type">🌿</span>
+                <span class="branch-name">{{ branch.name }}</span>
+                <span v-if="branch.current" class="current-indicator">●</span>
               </div>
-              <div v-if="filteredLocalBranches?.length === 0 && branchFilter === ''" class="no-branches">
-                <span class="empty-message">无本地分支</span>
-              </div>
-            </div>
-            <div v-if="(filteredLocalBranches?.value?.length || 0) === 0 && branchFilter?.value === ''"
-                 class="empty-branches">
-              <span class="empty-message">无本地分支</span>
             </div>
           </div>
 
-          <div class="branch-section">
-            <div class="section-header">
-              <h3 class="section-title">远程分支</h3>
-              <span class="item-count">({{ (filteredRemoteBranches?.value?.length || 0) }})</span>
+          <div class="collapsible-section">
+            <div class="section-header" @click="toggleSection('remoteBranches')">
+              <h3 class="section-title">
+                <span :class="['collapse-toggle', { 'expanded': expandedSections.remoteBranches }]">▼</span>
+                远程分支
+              </h3>
+              <span class="item-count">({{ filteredRemoteBranches?.length || 0 }})</span>
             </div>
-            <div class="branch-list">
-              <div
-                  v-for="branch in filteredRemoteBranches"
-                  :key="'remote-' + branch.name"
-                  :class="['branch-item', { 'active': branch.current }]"
-                  @dblclick="showBranchHistory(branch.name.replace('origin/', ''))"
-                  @contextmenu.prevent="openBranchContextMenu($event, branch, 'remote')"
+            <div v-show="expandedSections.remoteBranches" class="section-content">
+              <div 
+                v-for="branch in filteredRemoteBranches"
+                :key="'remote-' + branch.name"
+                :class="['branch-item']"
+                @click="selectRemoteBranch(branch.name)"
               >
-                <div class="branch-info">
-                  <span class="branch-type">📡</span>
-                  <span class="branch-name" :title="branch.name">{{ branch.name }}</span>
-                  <span v-if="branch.current" class="branch-current-badge" title="当前分支">●</span>
-                </div>
-                <div class="branch-actions">
-                  <button
-                      v-if="!branch.current"
-                      @click.stop="switchBranch(branch.name)"
-                      class="action-btn switch-btn"
-                      title="切换到此分支"
-                  >
-                    ↔️
-                  </button>
-                </div>
+                <span class="branch-type">📡</span>
+                <span class="branch-name">{{ branch.name }}</span>
               </div>
-              <div v-if="(filteredRemoteBranches?.value?.length || 0) === 0 && branchFilter?.value === ''"
-                   class="empty-branches">
-                <span class="empty-message">无远程分支</span>
-              </div>
+            </div>
+          </div>
+
+          <div class="collapsible-section">
+            <div class="section-header" @click="toggleSection('tags')">
+              <h3 class="section-title">
+                <span :class="['collapse-toggle', { 'expanded': expandedSections.tags }]">▼</span>
+                标签
+              </h3>
+              <span class="item-count">(0)</span>
+            </div>
+            <div v-show="expandedSections.tags" class="section-content">
+              <div class="placeholder-item">暂无标签</div>
             </div>
           </div>
         </div>
       </aside>
 
-      <!-- 中间主内容区 -->
-      <main class="main-area">
-        <!-- 文件状态面板 -->
-        <section class="panel file-status-panel">
-          <div class="panel-header">
-            <h2 class="panel-title">
-              <span class="status-icon">📋</span>
-              工作区状态
-            </h2>
-            <div class="panel-actions">
-              <button @click="showStatus" class="icon-btn" title="查看详细状态">
-                👁️
-              </button>
-              <button @click="stageAll" class="icon-btn" title="暂存全部">
-                📥
-              </button>
-              <button @click="refreshStatus" class="icon-btn" title="刷新状态">
-                🔄
-              </button>
-            </div>
-          </div>
-
-          <div class="panel-content">
-            <div v-if="statusLoading" class="loading-state">
-              <div class="spinner"></div>
-              <span>加载状态中...</span>
-            </div>
-            <div v-else-if="!repoPath" class="empty-state">
-              <span class="empty-icon">📁</span>
-              <p>请先加载仓库以查看工作区状态</p>
-            </div>
-            <div v-else-if="(workingFiles?.value?.length || 0) === 0 && (stagedFiles?.value?.length || 0) === 0"
-                 class="empty-state">
-              <span class="empty-icon">✅</span>
-              <p>工作区干净，无待提交更改</p>
-            </div>
-            <div v-else class="status-content">
-              <!-- 未暂存文件 -->
-              <div v-if="(workingFiles?.length || 0) > 0" class="status-section">
-                <h3 class="status-section-title">
-                  <span class="file-change-icon modified">●</span>
-                  修改的文件
-                  <span class="item-count">({{ workingFiles?.length || 0 }})</span>
-                </h3>
-                <div class="file-list">
-                  <div
-                      v-for="file in workingFiles"
-                      :key="'working-' + file.path"
-                      class="file-item"
-                  >
-                    <span class="file-status modified">●</span>
-                    <span class="file-path">{{ file.path }}</span>
-                    <div class="file-actions">
-                      <button @click="stageFile(file.path)" class="small-btn primary">
-                        暂存
-                      </button>
-                      <button @click="discardChanges(file.path)" class="small-btn danger">
-                        丢弃
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 已暂存文件 -->
-              <div v-if="(stagedFiles?.length || 0) > 0" class="status-section">
-                <h3 class="status-section-title">
-                  <span class="file-change-icon staged">✓</span>
-                  已暂存文件
-                  <span class="item-count">({{ stagedFiles?.length || 0 }})</span>
-                </h3>
-                <div class="file-list">
-                  <div
-                      v-for="file in stagedFiles"
-                      :key="'staged-' + file.path"
-                      class="file-item"
-                  >
-                    <span class="file-status staged">✓</span>
-                    <span class="file-path">{{ file.path }}</span>
-                    <div class="file-actions">
-                      <button @click="unstageFile(file.path)" class="small-btn secondary">
-                        取消暂存
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- 提交面板 -->
-        <section class="panel commit-panel">
-          <div class="panel-header">
-            <h2 class="panel-title">
-              <span class="commit-icon">✍️</span>
-              创建提交
-            </h2>
-          </div>
-
-          <div class="panel-content">
-            <div class="commit-form">
-              <textarea
-                  v-model="commitMessage"
-                  placeholder="输入提交信息..."
-                  class="commit-message-input"
-                  rows="3"
-              ></textarea>
-              <div class="commit-actions">
-                <button
-                    @click="commitChanges"
-                    :disabled="!canCommit"
-                    class="primary-btn commit-btn"
-                >
-                  <span class="btn-icon">💾</span>
-                  提交更改 ({{ (stagedFiles?.value?.length || 0) }} 个文件)
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <!-- 右侧边栏 - 提交历史 -->
-      <aside class="sidebar right-sidebar">
+      <!-- 中间主内容区 - 提交历史图表 -->
+      <main class="main-content-area">
         <div class="panel-header">
           <h2 class="panel-title">
-            <span class="history-icon">📜</span>
+            <span class="history-icon">📅</span>
             提交历史
           </h2>
         </div>
-
         <div class="panel-content">
-          <div v-if="commitsLoading" class="loading-state">
-            <div class="spinner"></div>
-            <span>加载提交历史...</span>
-          </div>
-          <div v-else-if="!repoPath" class="empty-state">
-            <span class="empty-icon">📁</span>
-            <p>请先加载仓库以查看提交历史</p>
-          </div>
-          <div v-else-if="(commits?.length || 0) === 0" class="empty-state">
-            <span class="empty-icon">📝</span>
-            <p>暂无提交历史</p>
-          </div>
-          <div v-else-if="commits && Array.isArray(commits) && commits.length > 0" class="commits-container">
-            <div
-                v-for="(commit, index) in commits"
-                :key="commit?.hash || index.toString()"
-                class="commit-item"
-                @click="selectCommit(commit)"
-                :class="{ 'selected': selectedCommit && selectedCommit.hash === commit.hash }"
+          <div class="commit-graph-container">
+            <div 
+              v-for="(commit, index) in commits" 
+              :key="commit.hash"
+              :class="['commit-item', { 'selected': selectedCommit && selectedCommit.hash === commit.hash }]"
+              @click="selectCommit(commit)"
             >
-              <div class="commit-overview">
-                <div class="commit-graph">
-                  <div class="commit-dot" :style="getCommitColor(index)"></div>
-                  <div class="commit-line" :style="getCommitLineColor(index)"></div>
-                </div>
+              <div class="commit-graph">
+                <div class="commit-dot" :style="getCommitColor(index)"></div>
+                <div class="commit-line" :style="getCommitLineColor(index)"></div>
+              </div>
+              <div class="commit-details">
                 <div class="commit-main">
-                  <div class="commit-hash" :title="commit?.hash">{{ commit?.hash?.substring(0, 8) || 'N/A' }}</div>
-                  <div class="commit-message" :title="commit?.message">{{ truncateText(commit?.message, 60) }}</div>
+                  <div class="commit-message">{{ commit.message }}</div>
+                  <div class="commit-hash">{{ commit.hash.substring(0, 7) }}</div>
                 </div>
                 <div class="commit-meta">
-                  <div class="commit-author" :title="commit?.author">{{
-                      (commit?.author || '').split('<')[0].trim()
-                    }}
-                  </div>
-                  <div class="commit-date" :title="commit?.date">{{ formatDate(commit?.date) }}</div>
+                  <div class="commit-author">{{ commit.author }}</div>
+                  <div class="commit-date">{{ formatDate(commit.date) }}</div>
                 </div>
               </div>
-              <div class="commit-refs" v-if="commit?.branches && commit.branches.length > 0">
-                <span
-                    v-for="branch in commit.branches"
-                    :key="branch"
-                    class="commit-ref"
-                >
-                  {{ branch }}
-                </span>
+            </div>
+            <div v-if="commits.length === 0" class="empty-state">
+              <div class="empty-icon">📦</div>
+              <p>暂无提交记录</p>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- 右侧操作面板 - 暂存和提交 -->
+      <aside class="sidebar right-sidebar">
+        <div class="panel-header">
+          <h2 class="panel-title">
+            <span class="staging-icon">📋</span>
+            <span v-if="selectedCommit">提交详情</span>
+            <span v-else>暂存 & 提交</span>
+          </h2>
+        </div>
+        <div class="panel-content">
+          <!-- 当选中提交时显示详情 -->
+          <div v-if="selectedCommit" class="commit-detail-view">
+            <div class="detail-header">
+              <div class="detail-hash">{{ selectedCommit.hash }}</div>
+              <div class="detail-message">{{ selectedCommit.message }}</div>
+            </div>
+            <div class="detail-meta">
+              <div class="detail-author">作者: {{ selectedCommit.author }}</div>
+              <div class="detail-date">日期: {{ formatDate(selectedCommit.date) }}</div>
+            </div>
+            <div class="diff-preview">
+              <h4>文件变更预览</h4>
+              <div class="diff-placeholder">
+                <!-- 此处将显示文件差异预览 -->
+                <p>变更文件列表将在后续版本中实现</p>
               </div>
             </div>
+          </div>
+
+          <!-- 当没有选中提交且有工作区更改时显示暂存/提交视图 -->
+          <div v-else-if="workingFiles.length > 0 || stagedFiles.length > 0" class="staging-view">
+            <!-- 文件变更列表 -->
+            <div class="file-changes-section">
+              <h4 class="section-subtitle">
+                <span class="file-change-icon modified">📝</span>
+                文件变更 ({{ workingFiles.length }})
+              </h4>
+              <div class="file-list">
+                <div 
+                  v-for="file in workingFiles" 
+                  :key="'working-' + file.path"
+                  class="file-item"
+                >
+                  <input 
+                    type="checkbox" 
+                    @change="toggleStageFile(file.path)"
+                    class="file-checkbox"
+                  >
+                  <span class="file-status modified">{{ file.status }}</span>
+                  <span class="file-path">{{ file.path }}</span>
+                  <div class="file-actions">
+                    <button @click="discardChanges(file.path)" class="small-btn danger">丢弃</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="file-changes-section">
+              <h4 class="section-subtitle">
+                <span class="file-change-icon staged">✅</span>
+                已暂存 ({{ stagedFiles.length }})
+              </h4>
+              <div class="file-list">
+                <div 
+                  v-for="file in stagedFiles" 
+                  :key="'staged-' + file.path"
+                  class="file-item"
+                >
+                  <input 
+                    type="checkbox" 
+                    checked
+                    @change="toggleUnstageFile(file.path)"
+                    class="file-checkbox"
+                  >
+                  <span class="file-status staged">{{ file.status }}</span>
+                  <span class="file-path">{{ file.path }}</span>
+                  <div class="file-actions">
+                    <button @click="unstageFile(file.path)" class="small-btn secondary">取消</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 提交区域 -->
+            <div class="commit-section">
+              <div class="commit-input-group">
+                <input 
+                  v-model="commitMessage" 
+                  type="text" 
+                  placeholder="提交摘要 (必填)" 
+                  class="commit-summary-input"
+                >
+              </div>
+              <textarea 
+                v-model="commitDescription" 
+                placeholder="详细描述 (可选)" 
+                class="commit-description-input"
+              ></textarea>
+              <button 
+                @click="commitChanges" 
+                :disabled="!canCommit" 
+                class="commit-action-btn"
+              >
+                <span class="btn-icon">📤</span>
+                提交 ({{ stagedFiles.length }})
+              </button>
+            </div>
+          </div>
+
+          <!-- 当没有更改时的空状态 -->
+          <div v-else class="empty-staging-view">
+            <div class="empty-icon">✨</div>
+            <p>工作区干净，无需提交</p>
           </div>
         </div>
       </aside>
@@ -359,23 +284,19 @@
     <!-- 底部状态栏 -->
     <footer class="status-bar">
       <div class="status-left">
-        <span class="current-branch">
-          🌿 {{ currentBranch || '未加载仓库' }}
-        </span>
+        <span class="current-branch">分支: {{ currentBranch || '无' }}</span>
+        <span class="repo-path">{{ repoPath || '未选择仓库' }}</span>
       </div>
       <div class="status-center">
-        <span class="repo-path" v-if="repoPath" :title="repoPath">
-          {{ repoPath }}
+        <span class="change-summary">
+          <span class="working-changes">修改: {{ workingFiles.length }}</span>
+          <span class="staged-changes">暂存: {{ stagedFiles.length }}</span>
         </span>
       </div>
       <div class="status-right">
-        <span class="change-summary">
-          <span v-if="(workingFiles?.length || 0) > 0" class="working-changes">
-            🔴 {{ workingFiles?.length || 0 }} 个修改
-          </span>
-          <span v-if="(stagedFiles?.length || 0) > 0" class="staged-changes">
-            🟢 {{ stagedFiles?.length || 0 }} 个暂存
-          </span>
+        <span class="connection-status">
+          <span :class="['status-indicator', { 'connected': repoPath, 'disconnected': !repoPath }]" ></span>
+          <span>{{ repoPath ? '已连接' : '未连接' }}</span>
         </span>
       </div>
     </footer>
@@ -393,7 +314,7 @@
 </template>
 
 <script>
-import {computed, onMounted, reactive, ref} from 'vue'
+import {computed, onMounted, reactive, ref, onUpdated} from 'vue'
 
 // 导入Wails运行时和Go模块
 // 注意：在生产环境中，Wails会在运行时注入这些对象，所以不需要显式导入
@@ -414,9 +335,18 @@ export default {
     // 新增状态变量
     const workingFiles = ref([])  // 未暂存的文件
     const stagedFiles = ref([])   // 已暂存的文件
-    const commitMessage = ref('') // 提交信息
+    const commitMessage = ref('') // 提交信息摘要
+    const commitDescription = ref('') // 提交信息详细描述
     const branchFilter = ref('')  // 分支过滤器
     const selectedCommit = ref(null) // 当前选中的提交
+    const pullCount = ref(0) // 落后提交数
+    
+    // 控制折叠面板展开状态
+    const expandedSections = reactive({
+      localBranches: true,
+      remoteBranches: true,
+      tags: false
+    })
 
     // 用于存储原始文件列表，以便进行暂存/取消暂存操作
     const originalStatus = ref('')
@@ -468,12 +398,6 @@ export default {
       )
     })
 
-    // 截断文本以适应显示
-    const truncateText = (text, maxLength) => {
-      if (!text) return ''
-      return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
-    }
-
     // Methods
     const showNotification = (message, type = 'info') => {
       notification.message = message
@@ -490,13 +414,29 @@ export default {
     const formatDate = (dateString) => {
       try {
         const date = new Date(dateString)
-        return date.toLocaleDateString('zh-CN', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        })
+        // 返回相对时间
+        const now = new Date()
+        const diffMs = now - date
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+        
+        if (diffDays === 0) {
+          const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+          if (diffHours === 0) {
+            const diffMinutes = Math.floor(diffMs / (1000 * 60))
+            return `${diffMinutes}分钟前`
+          }
+          return `${diffHours}小时前`
+        } else if (diffDays === 1) {
+          return '昨天'
+        } else if (diffDays < 7) {
+          return `${diffDays}天前`
+        } else {
+          return date.toLocaleDateString('zh-CN', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          })
+        }
       } catch {
         return dateString
       }
@@ -702,6 +642,11 @@ export default {
         showNotification(`暂存文件失败: ${error}`, 'error')
       }
     }
+    
+    // 切换文件暂存状态
+    const toggleStageFile = async (filePath) => {
+      await stageFile(filePath)
+    }
 
     // 取消暂存单个文件
     const unstageFile = async (filePath) => {
@@ -714,6 +659,11 @@ export default {
       } catch (error) {
         showNotification(`取消暂存失败: ${error}`, 'error')
       }
+    }
+    
+    // 切换文件取消暂存状态
+    const toggleUnstageFile = async (filePath) => {
+      await unstageFile(filePath)
     }
 
     // 暂存所有文件
@@ -756,8 +706,13 @@ export default {
       }
 
       try {
-        await window.go.main.App.GitCommit(repoPath.value, commitMessage.value)
+        const fullMessage = commitDescription.value ? 
+          `${commitMessage.value}\n\n${commitDescription.value}` : 
+          commitMessage.value
+        
+        await window.go.main.App.GitCommit(repoPath.value, fullMessage)
         commitMessage.value = ''
+        commitDescription.value = ''
         await refreshData()
         showNotification('提交成功', 'success')
       } catch (error) {
@@ -776,6 +731,16 @@ export default {
       } catch (error) {
         showNotification(`切换分支失败: ${error}`, 'error')
       }
+    }
+    
+    // 选择分支（不切换，只高亮显示）
+    const selectBranch = (branchName) => {
+      console.log(`选中分支: ${branchName}`)
+    }
+    
+    // 选择远程分支
+    const selectRemoteBranch = (branchName) => {
+      console.log(`选中远程分支: ${branchName}`)
     }
 
     const createBranch = async () => {
@@ -1076,6 +1041,41 @@ export default {
         showNotification(`推送失败: ${error}`, 'error')
       }
     }
+    
+    // 获取最新更改
+    const fetchChanges = async () => {
+      if (!repoPath.value) {
+        showNotification('请先加载仓库', 'error')
+        return
+      }
+
+      try {
+        const result = await window.go.main.App.GitFetch(repoPath.value)
+        showNotification(`获取成功: ${result || '无新更改'}`, 'success')
+        // 更新落后的提交数
+        updatePullCount()
+      } catch (error) {
+        showNotification(`获取失败: ${error}`, 'error')
+      }
+    }
+    
+    // 更新落后的提交数
+    const updatePullCount = async () => {
+      if (!repoPath.value) return
+      
+      try {
+        // 这里应该调用一个计算落后提交数的API
+        // 暂时设置为模拟值
+        pullCount.value = Math.floor(Math.random() * 5) // 模拟随机落后数
+      } catch (error) {
+        console.error('更新落后提交数失败:', error)
+      }
+    }
+    
+    // 切换折叠面板
+    const toggleSection = (section) => {
+      expandedSections[section] = !expandedSections[section]
+    }
 
     // 页面加载时初始化
     onMounted(async () => {
@@ -1084,11 +1084,18 @@ export default {
         await loadRepo()
       }
     })
+    
+    // 组件更新后重新计算落后提交数
+    onUpdated(() => {
+      if (repoPath.value) {
+        updatePullCount()
+      }
+    })
 
     return {
       repoPath,
       currentBranch,
-      branches: allBranches,
+      allBranches,
       commits,
       branchesLoading,
       commitsLoading,
@@ -1098,9 +1105,13 @@ export default {
       workingFiles,
       stagedFiles,
       commitMessage,
+      commitDescription,
       canCommit,
       selectedCommit,
+      pullCount,
+      expandedSections,
       notification,
+      branchFilter,
       loadRepo,
       refreshData,
       loadBranches,
@@ -1109,6 +1120,8 @@ export default {
       loadStatus,
       refreshStatus,
       switchBranch,
+      selectBranch,
+      selectRemoteBranch,
       createBranch,
       createBranchFromRemote,
       showStatus,
@@ -1116,19 +1129,22 @@ export default {
       refreshCommits,
       stageFile,
       unstageFile,
+      toggleStageFile,
+      toggleUnstageFile,
       stageAll,
       discardChanges,
       commitChanges,
       browseRepo,
       pullChanges,
       pushChanges,
+      fetchChanges,
       selectCommit,
       showBranchHistory,
       openBranchContextMenu,
       getCommitColor,
       getCommitLineColor,
-      truncateText,
       formatDate,
+      toggleSection,
       showNotification
     }
   }

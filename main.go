@@ -279,7 +279,7 @@ func main() {
 
 	err := wails.Run(&options.App{
 		Title:             "Go Git Client",
-		Width:             800,
+		Width:             1000,
 		Height:            600,
 		DisableResize:     false,
 		Fullscreen:        false,
