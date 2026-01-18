@@ -221,11 +221,6 @@ func (s *GitCoreService) GetBranchLog(repoPath, branch string, limit int) ([]mod
 	return commits, nil
 }
 
-// GetCommits 获取提交历史
-func (s *GitCoreService) GetCommits(repoPath string, limit int) ([]models.GitCommitRecord, error) {
-	return s.GetLog(repoPath, limit)
-}
-
 // GetStatus 获取仓库状态
 func (s *GitCoreService) GetStatus(repoPath string) ([]models.GitFileStatus, error) {
 	return s.GetStatusStructured(repoPath)
@@ -516,36 +511,6 @@ func (s *GitCoreService) GetFileDiff(repoPath, filename string, staged bool) ([]
 	}
 
 	return diffs, nil
-}
-
-// GetLog 获取Git提交历史
-func (s *GitCoreService) GetLog(repoPath string, limit int) ([]models.GitCommitRecord, error) {
-	if strings.TrimSpace(repoPath) == "" {
-		return nil, fmt.Errorf("path cannot be empty")
-	}
-
-	limitStr := fmt.Sprintf("-%d", limit)
-	output, err := ExecuteGitCommand(repoPath, "log", "--pretty=format:%H|%D|%s|%an|%ad", "--date=iso", limitStr)
-	if err != nil {
-		return nil, err
-	}
-
-	lines := strings.Split(output, "\n")
-	var commits []models.GitCommitRecord
-
-	for _, line := range lines {
-		if strings.TrimSpace(line) == "" {
-			continue
-		}
-
-		commit, err := ParseCommitLine(line)
-		if err != nil {
-			continue
-		}
-		commits = append(commits, *commit)
-	}
-
-	return commits, nil
 }
 
 // GetGraphHistory 获取图形化历史数据

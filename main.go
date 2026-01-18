@@ -115,15 +115,6 @@ func (a *App) GitFileDiff(path, filename string, staged bool) (string, error) {
 	return utils.ToJsonString(result), nil
 }
 
-// GitLog 获取Git提交历史
-func (a *App) GitLog(path string, limit int) (string, error) {
-	result, err := a.gitService.GetLog(path, limit)
-	if err != nil {
-		return "", err
-	}
-	return utils.ToJsonString(result), nil
-}
-
 // GitShowBranchTree 获取分支树结构
 func (a *App) GitShowBranchTree(path string) (string, error) {
 	result, err := a.gitService.ShowBranchTree(path)

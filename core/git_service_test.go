@@ -14,7 +14,11 @@ var gitService = NewGitCoreService()
 func TestGetBranchLog(t *testing.T) {
 	branch, _ := gitService.GetCurrentBranch(repoPath)
 	logs, _ := gitService.GetBranchLog(repoPath, branch, 100)
-	fmt.Println(logs)
+	if logs != nil {
+		for _, item := range logs {
+			fmt.Println(item)
+		}
+	}
 }
 
 func TestGetCurrentBranch(t *testing.T) {
