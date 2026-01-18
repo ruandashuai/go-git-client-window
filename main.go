@@ -12,7 +12,6 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 
 	"go-git-client-window/core"
-	"go-git-client-window/internal/gitcmd"
 	"go-git-client-window/models"
 	"go-git-client-window/utils"
 )
@@ -30,8 +29,7 @@ type App struct {
 
 // NewApp creates a new App application struct
 func NewApp() *App {
-	gitCmdService := gitcmd.NewGitService()
-	gitCoreService := core.NewGitCoreService(gitCmdService)
+	gitCoreService := core.NewGitCoreService()
 	return &App{
 		gitService: gitCoreService,
 	}
@@ -128,7 +126,7 @@ func (a *App) GitLog(path string, limit int) (string, error) {
 
 // GitShowBranchTree 获取分支树结构
 func (a *App) GitShowBranchTree(path string) (string, error) {
-	result, err := a.gitService.GetGraphHistory(path, 0)
+	result, err := a.gitService.ShowBranchTree(path)
 	if err != nil {
 		return "", err
 	}
@@ -256,7 +254,7 @@ func (a *App) GitBlame(path, filename string) ([]models.GitBlameLine, error) {
 
 // GitGetGraphHistory 获取图形化历史数据
 func (a *App) GitGetGraphHistory(path string, limit int) (string, error) {
-	result, err := a.gitService.GetGraphHistory(path, limit)
+	result, err := a.gitService.GetGraphHistoryWithFormat(path, limit)
 	if err != nil {
 		return "", err
 	}
