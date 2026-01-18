@@ -267,10 +267,6 @@ func (s *GitCoreService) CheckoutBranch(repoPath, branchName string) (string, er
 
 // CreateBranch 创建分支
 func (s *GitCoreService) CreateBranch(repoPath, branchName string) (string, error) {
-	if strings.TrimSpace(repoPath) == "" {
-		return "", fmt.Errorf("path cannot be empty")
-	}
-
 	output, err := ExecuteGitCommand(repoPath, "checkout", "-b", branchName)
 	if err != nil {
 		return "", err
